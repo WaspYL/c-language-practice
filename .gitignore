@@ -1,0 +1,26 @@
+# ===== Visual Studio 编译产物 =====
+*.exe
+*.o
+*.obj
+*.pdb
+*.ilk
+*.exp
+*.lib
+
+# ===== Visual Studio 项目文件（如果用VS写代码，先注释掉下面两行，按需保留） =====
+# .vs/
+# *.sln
+# *.vcxproj
+# *.vcxproj.filters
+
+# ===== Dev-C++ / GCC 编译产物 =====
+*.out
+
+# ===== 临时文件 =====
+*.tmp
+*.bak
+*~
+
+# ===== 系统文件 =====
+Thumbs.db
+Desktop.ini
