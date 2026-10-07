@@ -10,8 +10,7 @@
             "stopAtEntry": false,
             "cwd": "${fileDirname}",
             "environment": [],
-            "externalConsole": true,
-            "MIMode": "gdb",
+            "console": "externalTerminal",
             "preLaunchTask": "C/C++: 编译当前文件"
         }
     ]
