@@ -1,20 +1,20 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
-//指针+-整
-void print_arr(int* p, int len)
-{
-	for (int i = 0;i < len;i++)
-	{
-		printf("%d ", *(p + i));
-	}
-}
-int main()
-{
-	int arr[] = { 1,2,3,4,5 };
-	int len = sizeof(arr) / sizeof(arr[0]);
-	print_arr(arr, len);
-	return 0;
-}
+// //指针+-整
+// void print_arr(int* p, int len)
+// {
+// 	for (int i = 0;i < len;i++)
+// 	{
+// 		printf("%d ", *(p + i));
+// 	}
+// }
+// int main()
+// {
+// 	int arr[] = { 1,2,3,4,5 };
+// 	int len = sizeof(arr) / sizeof(arr[0]);
+// 	print_arr(arr, len);
+// 	return 0;
+// }
 
 ////循环求菲波那切数列的第N项
 //int pib(int n)
@@ -42,34 +42,34 @@ int main()
 //	return 0;
 //}
 
-//void prt(int arr[],int n)
-//{
-//	printf("顺序打印:\n");
-//	for (int i = 0;i < n;i++)
-//	{
-//		printf("%d ", arr[i]);
-//	}
-//	
-//	
-//}
-//int main()
-//{
-//	int n;
-//	printf("请输入数组大小:\n");
-//	while (scanf("%d", &n) != EOF)
-//	{
-//		int arr[n];
-//		printf("请输入数组内容:\n");
-//		for (int i = 0;i < n;i++)
-//		{
-//			scanf("%d", &arr[i]);
-//		}
-//		prt(arr,n);
-//	}
-//
-//	printf("\n");
-//	return 0;
-//}
+// void prt(int arr[],int n)
+// {
+// 	printf("顺序打印:\n");
+// 	for (int i = 0;i < n;i++)
+// 	{
+// 		printf("%d ", arr[i]);
+// 	}
+	
+	
+// }
+// int main()
+// {
+// 	int n;
+// 	printf("请输入数组大小:\n");
+// 	while (scanf("%d", &n) != EOF)
+// 	{
+// 		int arr[100];
+// 		printf("请输入数组内容:\n");
+// 		for (int i = 0;i < n;i++)
+// 		{
+// 			scanf("%d", &arr[i]);
+// 		}
+// 		prt(arr,n);
+// 	}
+
+// 	printf("\n");
+// 	return 0;
+// }
 
 
 
