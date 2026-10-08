@@ -1,5 +1,18 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
+int main()
+{
+    int a=10;
+    int b=20;
+    int *p=&a;
+    printf("%d\n",*p);
+    p=&b;
+    printf("%d\n",*p);
+    return 0;
+}
+
+
+
 // //指针+-整
 // void print_arr(int* p, int len)
 // {
