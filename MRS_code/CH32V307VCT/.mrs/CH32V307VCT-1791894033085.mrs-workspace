@@ -5,11 +5,12 @@
 		},
 		{
 			"name": "CH32V307VCT",
-			"path": "c:\\Users\\WaspYL\\Desktop\\c-language-practice\\MRS_code\\CH32V307VCT"
+			"path": "C:\\Users\\WaspYL\\Desktop\\c-language-practice\\MRS_code\\CH32V307VCT"
 		}
 	],
 	"settings": {
 		"mrs.workspace.type": "project",
+		"mrs.init.arg": "",
 		"files.associations": {
 			"*.c": "c",
 			"*.h": "cpp",

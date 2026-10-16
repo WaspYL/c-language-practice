@@ -368,9 +368,20 @@ void ADXL345_Read(int16_t *x, int16_t *y, int16_t *z)
     *z = (int16_t)((zh << 8) | zl);
 }
 
+// 震动等级阈值（可根据实际情况调整）
+#define THRESHOLD_LIGHT   30    // 轻微震动
+#define THRESHOLD_THEFT   100   // 防盗报警
+#define THRESHOLD_QUAKE   500   // 地震预警
+
 // ===================== main 函数 =====================
 int main(void)
 {
+    int16_t ax, ay, az;
+    int16_t last_ax=0, last_ay=0, last_az=0;
+    static uint8_t blink = 0;
+    uint8_t level = 0; // 0=安全 1=轻微 2=防盗 3=地震
+    int diff, max_val;
+
     Delay_Init();
     USART1_Init();
     BEEP_Init();
@@ -392,38 +403,83 @@ int main(void)
     BEEP_On(); Delay_Ms(1000); BEEP_Off();
     USART1_SendString("=== Ready ===\r\n\r\n");
 
-    int16_t ax, ay, az;
-    int16_t last_ax=0, last_ay=0, last_az=0;
-
     while(1)
     {
         ADXL345_Read(&ax, &ay, &az);
-        
+        blink++;
+
+        // 计算震动强度
+        diff = abs(ax - last_ax) + abs(ay - last_ay) + abs(az - last_az);
+        max_val = abs(ax);
+        if(abs(ay) > max_val) max_val = abs(ay);
+        if(abs(az) > max_val) max_val = abs(az);
+
+        // 判断震动等级
+        if(diff >= THRESHOLD_QUAKE) level = 3;
+        else if(diff >= THRESHOLD_THEFT) level = 2;
+        else if(diff >= THRESHOLD_LIGHT) level = 1;
+        else level = 0;
+
+        // 串口输出
         USART1_SendString("X:"); USART1_SendNum(ax);
         USART1_SendString(" Y:"); USART1_SendNum(ay);
         USART1_SendString(" Z:"); USART1_SendNum(az);
+        USART1_SendString(" Diff:"); USART1_SendNum(diff);
+        if(level == 3) USART1_SendString(" [QUAKE!]");
+        else if(level == 2) USART1_SendString(" [THEFT!]");
+        else if(level == 1) USART1_SendString(" [LIGHT]");
+        else USART1_SendString(" [SAFE]");
+        USART1_SendString("\r\n");
 
-        OLED_Clear();
-        // 三行数据居中，不重叠
-        OLED_ShowString(24, 0, "X:"); OLED_ShowNum(48, 0, ax);
-        OLED_ShowString(24, 3, "Y:"); OLED_ShowNum(48, 3, ay);
-        OLED_ShowString(24, 6, "Z:"); OLED_ShowNum(48, 6, az);
-        
-        // 震动检测+报警
-        int diff = abs(ax - last_ax) + abs(ay - last_ay) + abs(az - last_az);
-        if(diff > 50)
+        // 蜂鸣器控制：不同等级不同模式
+        if(level == 3)
         {
+            // 地震：持续长响
             BEEP_On();
-            USART1_SendString("  SHAKE!");
-            OLED_ShowString(80, 6, "ALARM");
+        }
+        else if(level == 2)
+        {
+            // 防盗：间歇响（滴-滴-滴）
+            if(blink % 2 == 0) BEEP_On();
+            else BEEP_Off();
         }
         else
         {
+            // 轻微和安全：不响
             BEEP_Off();
         }
-        last_ax = ax; last_ay = ay; last_az = az;
 
-        USART1_SendString("\r\n");
+        // OLED显示
+        OLED_Clear();
+        // 第1行：标题
+        OLED_ShowString(24, 0, "Vib Sensor");
+        // 第2行：震动强度
+        OLED_ShowString(8, 2, "Power:"); OLED_ShowNum(64, 2, diff);
+        // 第3行：状态显示（直观文字，居中）
+        if(level == 3)
+        {
+            // 危险/地震：闪烁
+            if(blink % 2 == 0) OLED_ShowString(40, 4, "DANGER");
+        }
+        else if(level == 2)
+        {
+            // 警告/防盗：闪烁
+            if(blink % 2 == 0) OLED_ShowString(40, 4, "WARN");
+        }
+        else if(level == 1)
+        {
+            // 提示/轻微
+            OLED_ShowString(40, 4, "TIP");
+        }
+        else
+        {
+            // 安全
+            OLED_ShowString(40, 4, "OK");
+        }
+        // 第4行：最大加速度
+        OLED_ShowString(8, 6, "MaxG:"); OLED_ShowNum(64, 6, max_val);
+
+        last_ax = ax; last_ay = ay; last_az = az;
         Delay_Ms(200);
     }
 }
