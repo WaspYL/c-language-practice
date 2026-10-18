@@ -1,6 +1,170 @@
 #include "ch32v30x.h"
 #include <stdlib.h>
 #include <stdint.h>
+#include "u8g2.h"
+
+// 函数声明（避免隐式声明警告）
+void USART1_SendString(char *str);
+void USART1_SendChar(char ch);
+void USART1_SendNum(uint32_t num);
+void I2C2_Init(void);
+uint8_t ADXL345_Init(void);
+void ADXL345_Read(int16_t *x, int16_t *y, int16_t *z);
+void BEEP_Init(void);
+void BEEP_On(void);
+void BEEP_Off(void);
+void OLED_Init_u8g2(void);
+void OLED_DrawFace_u8g2(uint8_t level);
+void Pixel(u8g2_t *u8g2, uint8_t x, uint8_t y);
+
+
+// ===================== u8g2 OLED驱动 =====================
+u8g2_t u8g2;  // u8g2全局对象
+
+// u8g2回调函数：告诉u8g2怎么用I2C发数据（带超时保护）
+uint8_t u8x8_byte_ch32_i2c(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr)
+{
+    static uint8_t buffer[64];
+    static uint8_t buf_idx;
+    static uint8_t i2c_addr;  // 保存I2C地址
+    uint8_t *data;
+    uint8_t i;
+    volatile uint32_t timeout;
+
+    switch(msg)
+    {
+        case U8X8_MSG_BYTE_SEND:
+            data = (uint8_t *)arg_ptr;
+            while(arg_int > 0)
+            {
+                buffer[buf_idx++] = *data;
+                data++;
+                arg_int--;
+            }
+            break;
+        case U8X8_MSG_BYTE_INIT:
+            break;
+        case U8X8_MSG_BYTE_SET_DC:
+            break;
+        case U8X8_MSG_BYTE_START_TRANSFER:
+            buf_idx = 0;
+            i2c_addr = u8x8_GetI2CAddress(u8x8);  // 正确获取I2C地址的方式！
+            break;
+        case U8X8_MSG_BYTE_END_TRANSFER:
+            // 发START
+            I2C_GenerateSTART(I2C2, ENABLE);
+            timeout = 10000;
+            while(!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_MODE_SELECT))
+            {
+                if(--timeout == 0) { I2C_GenerateSTOP(I2C2, ENABLE); return 0; }
+            }
+            // 发地址（u8g2传的地址已经是8位写地址）
+            I2C_SendData(I2C2, i2c_addr);
+            timeout = 10000;
+            while(!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))
+            {
+                if(--timeout == 0) { I2C_GenerateSTOP(I2C2, ENABLE); return 0; }
+            }
+            // 发数据（buffer里全是数据，不包括地址）
+            for(i = 0; i < buf_idx; i++)
+            {
+                I2C_SendData(I2C2, buffer[i]);
+                timeout = 10000;
+                while(!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED))
+                {
+                    if(--timeout == 0) { I2C_GenerateSTOP(I2C2, ENABLE); return 0; }
+                }
+            }
+            I2C_GenerateSTOP(I2C2, ENABLE);
+            break;
+        default:
+            break;
+    }
+    return 1;
+}
+
+// u8g2回调函数：告诉u8g2怎么延时
+uint8_t u8x8_gpio_and_delay_ch32(u8x8_t *u8x8, uint8_t msg, uint8_t arg_int, void *arg_ptr)
+{
+    switch(msg)
+    {
+        case U8X8_MSG_DELAY_MILLI:
+            Delay_Ms(arg_int);
+            break;
+        case U8X8_MSG_DELAY_10MICRO:
+            Delay_Ms(1);
+            break;
+        default:
+            break;
+    }
+    return 1;
+}
+
+// u8g2初始化
+// 画像素点辅助函数（每个点2x2像素）
+void Pixel(u8g2_t *u8g2, uint8_t x, uint8_t y)
+{
+    u8g2_DrawBox(u8g2, x*2, y*2, 2, 2);
+}
+
+void OLED_Init_u8g2(void)
+{
+    u8g2_Setup_ssd1306_i2c_128x64_noname_f(
+        &u8g2,
+        U8G2_R0,
+        u8x8_byte_ch32_i2c,
+        u8x8_gpio_and_delay_ch32
+    );
+    u8g2_InitDisplay(&u8g2);
+    u8g2_SetPowerSave(&u8g2, 0);
+}
+
+// u8g2画表情：极简方块眼风格
+void OLED_DrawFace_u8g2(uint8_t level)
+{
+    u8g2_ClearBuffer(&u8g2);
+
+    if(level == 0)  // 平静：方块眼睛+微笑
+    {
+        // 左眼（纯白方块，无高光）
+        u8g2_DrawBox(&u8g2, 32, 18, 18, 22);
+        // 右眼（纯白方块，无高光）
+        u8g2_DrawBox(&u8g2, 78, 18, 18, 22);
+        // 微笑嘴（平滑弧线，6段近似圆弧）
+        u8g2_DrawLine(&u8g2, 52, 52, 56, 56);
+        u8g2_DrawLine(&u8g2, 56, 56, 60, 58);
+        u8g2_DrawLine(&u8g2, 60, 58, 64, 59);
+        u8g2_DrawLine(&u8g2, 64, 59, 68, 58);
+        u8g2_DrawLine(&u8g2, 68, 58, 72, 56);
+        u8g2_DrawLine(&u8g2, 72, 56, 76, 52);
+    }
+    else if(level == 1)  // 惊讶：稍大方块眼睛+O嘴
+    {
+        // 左眼（纯白方块）
+        u8g2_DrawBox(&u8g2, 30, 16, 22, 26);
+        // 右眼（纯白方块）
+        u8g2_DrawBox(&u8g2, 76, 16, 22, 26);
+        // O型嘴（放大一点）
+        u8g2_DrawFrame(&u8g2, 56, 50, 16, 12);
+    }
+    else  // 害怕：X形眼睛+大张嘴（尖叫）
+    {
+        // 左眼（X形，表示紧张害怕）
+        u8g2_DrawLine(&u8g2, 28, 18, 50, 42);
+        u8g2_DrawLine(&u8g2, 50, 18, 28, 42);
+        u8g2_DrawLine(&u8g2, 32, 18, 54, 42);
+        u8g2_DrawLine(&u8g2, 54, 18, 32, 42);
+        // 右眼（X形）
+        u8g2_DrawLine(&u8g2, 74, 18, 96, 42);
+        u8g2_DrawLine(&u8g2, 96, 18, 74, 42);
+        u8g2_DrawLine(&u8g2, 78, 18, 100, 42);
+        u8g2_DrawLine(&u8g2, 100, 18, 78, 42);
+        // 大张嘴（尖叫，实心矩形）
+        u8g2_DrawBox(&u8g2, 52, 50, 24, 12);
+    }
+    u8g2_SendBuffer(&u8g2);
+}
+
 
 // ===================== 硬件引脚定义 =====================
 #define BEEP_PORT    GPIOA
@@ -81,7 +245,7 @@ void I2C2_Init(void)
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_OD;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOB, &GPIO_InitStruct);
-    I2C_InitStruct.I2C_ClockSpeed = 100000;
+    I2C_InitStruct.I2C_ClockSpeed = 50000;
     I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;
     I2C_InitStruct.I2C_DutyCycle = I2C_DutyCycle_2;
     I2C_InitStruct.I2C_OwnAddress1 = 0x00;
@@ -274,11 +438,12 @@ void OLED_SetPos(uint8_t x, uint8_t y)
 void OLED_ShowChar(uint8_t x, uint8_t y, uint8_t chr)
 {
     uint8_t c = chr - ' ';
+    uint8_t i;
     if(c > 95) c = 0;
     OLED_SetPos(x, y);
-    for(uint8_t i=0; i<8; i++) OLED_WriteData(F8X16[c*16 + i]);
+    for(i=0; i<8; i++) OLED_WriteData(F8X16[c*16 + i]);
     OLED_SetPos(x, y+1);
-    for(uint8_t i=0; i<8; i++) OLED_WriteData(F8X16[c*16 + i + 8]);
+    for(i=0; i<8; i++) OLED_WriteData(F8X16[c*16 + i + 8]);
 }
 
 void OLED_ShowString(uint8_t x, uint8_t y, char *str)
@@ -303,19 +468,32 @@ void OLED_ShowNum(uint8_t x, uint8_t y, int32_t num)
 
 void OLED_Clear(void)
 {
-    for(uint8_t y=0; y<8; y++)
+    uint8_t x, y;
+    for(y=0; y<8; y++)
     {
         OLED_SetPos(0, y);
-        for(uint8_t x=0; x<128; x++) OLED_WriteData(0x00);
+        for(x=0; x<128; x++) OLED_WriteData(0x00);
     }
 }
 
 void OLED_ClearLine(uint8_t y)
 {
+    uint8_t x;
     OLED_SetPos(0, y);
-    for(uint8_t x=0; x<128; x++) OLED_WriteData(0x00);
+    for(x=0; x<128; x++) OLED_WriteData(0x00);
     OLED_SetPos(0, y+1);
-    for(uint8_t x=0; x<128; x++) OLED_WriteData(0x00);
+    for(x=0; x<128; x++) OLED_WriteData(0x00);
+}
+
+// 清指定区域
+void OLED_ClearArea(uint8_t x0, uint8_t y0, uint8_t w, uint8_t h)
+{
+    uint8_t i, j;
+    for(i=0; i<h; i++)
+    {
+        OLED_SetPos(x0, y0+i);
+        for(j=0; j<w; j++) OLED_WriteData(0x00);
+    }
 }
 
 void OLED_Init(void)
@@ -337,7 +515,217 @@ void OLED_Init(void)
     OLED_WriteCmd(0xA4);
     OLED_WriteCmd(0xA6);
     OLED_WriteCmd(0xAF);
-    OLED_Clear();
+}
+
+// 画一个实心方块
+void OLED_DrawBlock(uint8_t x, uint8_t y, uint8_t w, uint8_t h)
+{
+    uint8_t i, j;
+    for(i=0; i<h; i++)
+    {
+        OLED_SetPos(x, y+i);
+        for(j=0; j<w; j++) OLED_WriteData(0xFF);
+    }
+}
+
+// 画一只带高光的圆眼睛
+void OLED_DrawEye(uint8_t x, uint8_t y)
+{
+    // 圆形眼睛（宽20，高24，3页）
+    // 第1页：顶部圆弧
+    OLED_DrawBlock(x+2, y, 16, 1);
+    // 第2页：最宽
+    OLED_DrawBlock(x, y+1, 20, 1);
+    // 第3页：底部圆弧
+    OLED_DrawBlock(x+2, y+2, 16, 1);
+    // 高光（右上角2x2白点，不画就是黑底上的白点）
+    OLED_SetPos(x+14, y); OLED_WriteData(0x00);
+    OLED_SetPos(x+15, y); OLED_WriteData(0x00);
+    OLED_SetPos(x+14, y+1); OLED_WriteData(0x00);
+    OLED_SetPos(x+15, y+1); OLED_WriteData(0x00);
+}
+
+// 画可爱机器人脸（生动版）
+void OLED_DrawFace(uint8_t level)
+{
+    uint8_t page, i;
+    // 先清大区域
+    for(page=1; page<8; page++)
+    {
+        OLED_SetPos(16, page);
+        for(i=0; i<96; i++) OLED_WriteData(0x00);
+    }
+    
+    if(level == 0) // 平静：圆眼睛带高光 + 微笑
+    {
+        // 左眼
+        OLED_DrawEye(24, 1);
+        // 右眼
+        OLED_DrawEye(84, 1);
+        // 微笑嘴
+        OLED_SetPos(44, 5); OLED_WriteData(0x00);
+        OLED_SetPos(45, 5); OLED_WriteData(0x80);
+        OLED_SetPos(46, 5); OLED_WriteData(0xC0);
+        OLED_SetPos(47, 5); OLED_WriteData(0xE0);
+        OLED_SetPos(48, 5); OLED_WriteData(0xF0);
+        OLED_SetPos(49, 5); OLED_WriteData(0xF8);
+        OLED_SetPos(50, 5); OLED_WriteData(0xFC);
+        OLED_SetPos(51, 5); OLED_WriteData(0xFE);
+        OLED_SetPos(52, 5); OLED_WriteData(0xFE);
+        OLED_SetPos(53, 5); OLED_WriteData(0xFC);
+        OLED_SetPos(54, 5); OLED_WriteData(0xF8);
+        OLED_SetPos(55, 5); OLED_WriteData(0xF0);
+        OLED_SetPos(56, 5); OLED_WriteData(0xE0);
+        OLED_SetPos(57, 5); OLED_WriteData(0xC0);
+        OLED_SetPos(58, 5); OLED_WriteData(0x80);
+        OLED_SetPos(59, 5); OLED_WriteData(0x00);
+        OLED_SetPos(44, 6); OLED_WriteData(0x00);
+        OLED_SetPos(45, 6); OLED_WriteData(0x00);
+        OLED_SetPos(46, 6); OLED_WriteData(0x01);
+        OLED_SetPos(47, 6); OLED_WriteData(0x03);
+        OLED_SetPos(48, 6); OLED_WriteData(0x07);
+        OLED_SetPos(49, 6); OLED_WriteData(0x0F);
+        OLED_SetPos(50, 6); OLED_WriteData(0x1F);
+        OLED_SetPos(51, 6); OLED_WriteData(0x3F);
+        OLED_SetPos(52, 6); OLED_WriteData(0x3F);
+        OLED_SetPos(53, 6); OLED_WriteData(0x1F);
+        OLED_SetPos(54, 6); OLED_WriteData(0x0F);
+        OLED_SetPos(55, 6); OLED_WriteData(0x07);
+        OLED_SetPos(56, 6); OLED_WriteData(0x03);
+        OLED_SetPos(57, 6); OLED_WriteData(0x01);
+        OLED_SetPos(58, 6); OLED_WriteData(0x00);
+        OLED_SetPos(59, 6); OLED_WriteData(0x00);
+    }
+    else if(level == 1) // 惊讶：大圆眼睛 + O型嘴
+    {
+        // 左眼（更大的圆）
+        OLED_DrawBlock(26, 1, 16, 1);
+        OLED_DrawBlock(22, 2, 24, 2);
+        OLED_DrawBlock(26, 4, 16, 1);
+        // 高光
+        OLED_SetPos(36, 1); OLED_WriteData(0x00);
+        OLED_SetPos(37, 1); OLED_WriteData(0x00);
+        OLED_SetPos(36, 2); OLED_WriteData(0x00);
+        OLED_SetPos(37, 2); OLED_WriteData(0x00);
+        // 右眼
+        OLED_DrawBlock(86, 1, 16, 1);
+        OLED_DrawBlock(82, 2, 24, 2);
+        OLED_DrawBlock(86, 4, 16, 1);
+        // 高光
+        OLED_SetPos(96, 1); OLED_WriteData(0x00);
+        OLED_SetPos(97, 1); OLED_WriteData(0x00);
+        OLED_SetPos(96, 2); OLED_WriteData(0x00);
+        OLED_SetPos(97, 2); OLED_WriteData(0x00);
+        // O型嘴
+        OLED_DrawBlock(50, 5, 8, 1);
+        OLED_DrawBlock(46, 6, 16, 1);
+        OLED_DrawBlock(50, 7, 8, 1);
+    }
+    else // 害怕：X眼睛 + 大嘴
+    {
+        // 左眼X
+        OLED_SetPos(24, 1); OLED_WriteData(0x81);
+        OLED_SetPos(25, 1); OLED_WriteData(0x42);
+        OLED_SetPos(26, 1); OLED_WriteData(0x24);
+        OLED_SetPos(27, 1); OLED_WriteData(0x18);
+        OLED_SetPos(28, 1); OLED_WriteData(0x18);
+        OLED_SetPos(29, 1); OLED_WriteData(0x24);
+        OLED_SetPos(30, 1); OLED_WriteData(0x42);
+        OLED_SetPos(31, 1); OLED_WriteData(0x81);
+        OLED_SetPos(32, 1); OLED_WriteData(0x81);
+        OLED_SetPos(33, 1); OLED_WriteData(0x42);
+        OLED_SetPos(34, 1); OLED_WriteData(0x24);
+        OLED_SetPos(35, 1); OLED_WriteData(0x18);
+        OLED_SetPos(36, 1); OLED_WriteData(0x18);
+        OLED_SetPos(37, 1); OLED_WriteData(0x24);
+        OLED_SetPos(38, 1); OLED_WriteData(0x42);
+        OLED_SetPos(39, 1); OLED_WriteData(0x81);
+        OLED_SetPos(24, 2); OLED_WriteData(0x42);
+        OLED_SetPos(25, 2); OLED_WriteData(0x81);
+        OLED_SetPos(26, 2); OLED_WriteData(0x81);
+        OLED_SetPos(27, 2); OLED_WriteData(0x42);
+        OLED_SetPos(28, 2); OLED_WriteData(0x42);
+        OLED_SetPos(29, 2); OLED_WriteData(0x81);
+        OLED_SetPos(30, 2); OLED_WriteData(0x81);
+        OLED_SetPos(31, 2); OLED_WriteData(0x42);
+        OLED_SetPos(32, 2); OLED_WriteData(0x42);
+        OLED_SetPos(33, 2); OLED_WriteData(0x81);
+        OLED_SetPos(34, 2); OLED_WriteData(0x81);
+        OLED_SetPos(35, 2); OLED_WriteData(0x42);
+        OLED_SetPos(36, 2); OLED_WriteData(0x42);
+        OLED_SetPos(37, 2); OLED_WriteData(0x81);
+        OLED_SetPos(38, 2); OLED_WriteData(0x81);
+        OLED_SetPos(39, 2); OLED_WriteData(0x42);
+        OLED_SetPos(24, 3); OLED_WriteData(0x24);
+        OLED_SetPos(25, 3); OLED_WriteData(0x42);
+        OLED_SetPos(26, 3); OLED_WriteData(0x81);
+        OLED_SetPos(27, 3); OLED_WriteData(0x81);
+        OLED_SetPos(28, 3); OLED_WriteData(0x81);
+        OLED_SetPos(29, 3); OLED_WriteData(0x81);
+        OLED_SetPos(30, 3); OLED_WriteData(0x42);
+        OLED_SetPos(31, 3); OLED_WriteData(0x24);
+        OLED_SetPos(32, 3); OLED_WriteData(0x24);
+        OLED_SetPos(33, 3); OLED_WriteData(0x42);
+        OLED_SetPos(34, 3); OLED_WriteData(0x81);
+        OLED_SetPos(35, 3); OLED_WriteData(0x81);
+        OLED_SetPos(36, 3); OLED_WriteData(0x81);
+        OLED_SetPos(37, 3); OLED_WriteData(0x81);
+        OLED_SetPos(38, 3); OLED_WriteData(0x42);
+        OLED_SetPos(39, 3); OLED_WriteData(0x24);
+        // 右眼X
+        OLED_SetPos(80, 1); OLED_WriteData(0x81);
+        OLED_SetPos(81, 1); OLED_WriteData(0x42);
+        OLED_SetPos(82, 1); OLED_WriteData(0x24);
+        OLED_SetPos(83, 1); OLED_WriteData(0x18);
+        OLED_SetPos(84, 1); OLED_WriteData(0x18);
+        OLED_SetPos(85, 1); OLED_WriteData(0x24);
+        OLED_SetPos(86, 1); OLED_WriteData(0x42);
+        OLED_SetPos(87, 1); OLED_WriteData(0x81);
+        OLED_SetPos(88, 1); OLED_WriteData(0x81);
+        OLED_SetPos(89, 1); OLED_WriteData(0x42);
+        OLED_SetPos(90, 1); OLED_WriteData(0x24);
+        OLED_SetPos(91, 1); OLED_WriteData(0x18);
+        OLED_SetPos(92, 1); OLED_WriteData(0x18);
+        OLED_SetPos(93, 1); OLED_WriteData(0x24);
+        OLED_SetPos(94, 1); OLED_WriteData(0x42);
+        OLED_SetPos(95, 1); OLED_WriteData(0x81);
+        OLED_SetPos(80, 2); OLED_WriteData(0x42);
+        OLED_SetPos(81, 2); OLED_WriteData(0x81);
+        OLED_SetPos(82, 2); OLED_WriteData(0x81);
+        OLED_SetPos(83, 2); OLED_WriteData(0x42);
+        OLED_SetPos(84, 2); OLED_WriteData(0x42);
+        OLED_SetPos(85, 2); OLED_WriteData(0x81);
+        OLED_SetPos(86, 2); OLED_WriteData(0x81);
+        OLED_SetPos(87, 2); OLED_WriteData(0x42);
+        OLED_SetPos(88, 2); OLED_WriteData(0x42);
+        OLED_SetPos(89, 2); OLED_WriteData(0x81);
+        OLED_SetPos(90, 2); OLED_WriteData(0x81);
+        OLED_SetPos(91, 2); OLED_WriteData(0x42);
+        OLED_SetPos(92, 2); OLED_WriteData(0x42);
+        OLED_SetPos(93, 2); OLED_WriteData(0x81);
+        OLED_SetPos(94, 2); OLED_WriteData(0x81);
+        OLED_SetPos(95, 2); OLED_WriteData(0x42);
+        OLED_SetPos(80, 3); OLED_WriteData(0x24);
+        OLED_SetPos(81, 3); OLED_WriteData(0x42);
+        OLED_SetPos(82, 3); OLED_WriteData(0x81);
+        OLED_SetPos(83, 3); OLED_WriteData(0x81);
+        OLED_SetPos(84, 3); OLED_WriteData(0x81);
+        OLED_SetPos(85, 3); OLED_WriteData(0x81);
+        OLED_SetPos(86, 3); OLED_WriteData(0x42);
+        OLED_SetPos(87, 3); OLED_WriteData(0x24);
+        OLED_SetPos(88, 3); OLED_WriteData(0x24);
+        OLED_SetPos(89, 3); OLED_WriteData(0x42);
+        OLED_SetPos(90, 3); OLED_WriteData(0x81);
+        OLED_SetPos(91, 3); OLED_WriteData(0x81);
+        OLED_SetPos(92, 3); OLED_WriteData(0x81);
+        OLED_SetPos(93, 3); OLED_WriteData(0x81);
+        OLED_SetPos(94, 3); OLED_WriteData(0x42);
+        OLED_SetPos(95, 3); OLED_WriteData(0x24);
+        // 大张嘴
+        OLED_DrawBlock(46, 5, 12, 1);
+        OLED_DrawBlock(42, 6, 20, 1);
+        OLED_DrawBlock(46, 7, 12, 1);
+    }
 }
 
 // ===================== ADXL345 函数 =====================
@@ -380,7 +768,15 @@ int main(void)
     int16_t last_ax=0, last_ay=0, last_az=0;
     static uint8_t blink = 0;
     uint8_t level = 0; // 0=安全 1=轻微 2=防盗 3=地震
+    uint8_t raw_level = 0; // 原始检测等级（未经过持续判断）
     int diff, max_val;
+    int diff_filtered; // 滤波后的震动强度
+    // 滑动平均滤波
+    int diff_history[5] = {0,0,0,0,0};
+    uint8_t hist_idx = 0;
+    // 持续震动判断计数器
+    uint8_t stable_count = 0;
+    uint8_t shake_duration = 0;  // 震动持续时间（单位：循环次数，5次=1秒）
 
     Delay_Init();
     USART1_Init();
@@ -396,12 +792,35 @@ int main(void)
     else USART1_SendString("[OK] ADXL Ready\r\n");
 
     USART1_SendString("[3/4] Init OLED...\r\n");
-    OLED_Init();
+    // 先测试I2C能不能通：读OLED的一个寄存器
+    {
+        uint8_t i2c_ok = 1;
+        // 发一个空命令测试OLED是否响应
+        I2C_GenerateSTART(I2C2, ENABLE);
+        volatile uint32_t t = 10000;
+        while(!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_MODE_SELECT)) { if(--t==0){i2c_ok=0;break;} }
+        if(i2c_ok)
+        {
+            I2C_SendData(I2C2, 0x78);
+            t = 10000;
+            while(!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)) { if(--t==0){i2c_ok=0;break;} }
+        }
+        I2C_GenerateSTOP(I2C2, ENABLE);
+        if(i2c_ok) USART1_SendString("[DEBUG] OLED I2C ACK OK\r\n");
+        else USART1_SendString("[DEBUG] OLED I2C ACK FAIL\r\n");
+    }
+    OLED_Init_u8g2();
     USART1_SendString("[OK] OLED Ready\r\n");
+    // 初始化后清屏
+    u8g2_ClearBuffer(&u8g2);
+    u8g2_SendBuffer(&u8g2);
+    USART1_SendString("[DEBUG] OLED cleared\r\n");
 
     USART1_SendString("[4/4] BEEP Test\r\n");
     BEEP_On(); Delay_Ms(1000); BEEP_Off();
     USART1_SendString("=== Ready ===\r\n\r\n");
+
+    // OLED初始化清屏
 
     while(1)
     {
@@ -414,17 +833,54 @@ int main(void)
         if(abs(ay) > max_val) max_val = abs(ay);
         if(abs(az) > max_val) max_val = abs(az);
 
-        // 判断震动等级
-        if(diff >= THRESHOLD_QUAKE) level = 3;
-        else if(diff >= THRESHOLD_THEFT) level = 2;
-        else if(diff >= THRESHOLD_LIGHT) level = 1;
-        else level = 0;
+        // 滑动平均滤波（5次平均，让数据更稳定，减少误报）
+        diff_history[hist_idx] = diff;
+        hist_idx++;
+        if(hist_idx >= 5) hist_idx = 0;
+        diff_filtered = (diff_history[0] + diff_history[1] + diff_history[2] + diff_history[3] + diff_history[4]) / 5;
+
+        // 用滤波后的数据判断原始等级
+        if(diff_filtered >= THRESHOLD_QUAKE) raw_level = 3;
+        else if(diff_filtered >= THRESHOLD_THEFT) raw_level = 2;
+        else if(diff_filtered >= THRESHOLD_LIGHT) raw_level = 1;
+        else raw_level = 0;
+
+        // 震动持续时间判断
+        if(raw_level >= 1) shake_duration++;  // 有震动，持续时间+1
+        else shake_duration = 0;               // 没震动，清零
+
+        // 持续震动判断：只有连续3次检测到防盗/地震才真正报警，减少误报
+        if(raw_level >= 2)
+        {
+            if(stable_count < 5) stable_count++;
+            if(stable_count >= 3)
+            {
+                // 持续时间判断：震动超过1秒（5次循环）才可能是地震
+                if(shake_duration >= 5 && raw_level >= 2)
+                {
+                    level = 3;  // 长时间震动 + 强度够 = 地震
+                }
+                else
+                {
+                    level = 2;  // 短时间震动 = 防盗/人为触碰
+                }
+            }
+            else
+            {
+                level = 1; // 偶尔震动，只显示轻微，不报警
+            }
+        }
+        else
+        {
+            stable_count = 0; // 没有持续震动，直接清零，不让噪声累积
+            level = raw_level; // 轻微或安全，直接显示
+        }
 
         // 串口输出
         USART1_SendString("X:"); USART1_SendNum(ax);
         USART1_SendString(" Y:"); USART1_SendNum(ay);
         USART1_SendString(" Z:"); USART1_SendNum(az);
-        USART1_SendString(" Diff:"); USART1_SendNum(diff);
+        USART1_SendString(" Diff:"); USART1_SendNum(diff_filtered);
         if(level == 3) USART1_SendString(" [QUAKE!]");
         else if(level == 2) USART1_SendString(" [THEFT!]");
         else if(level == 1) USART1_SendString(" [LIGHT]");
@@ -449,35 +905,17 @@ int main(void)
             BEEP_Off();
         }
 
-        // OLED显示
-        OLED_Clear();
-        // 第1行：标题
-        OLED_ShowString(24, 0, "Vib Sensor");
-        // 第2行：震动强度
-        OLED_ShowString(8, 2, "Power:"); OLED_ShowNum(64, 2, diff);
-        // 第3行：状态显示（直观文字，居中）
-        if(level == 3)
+        // OLED显示：u8g2大表情
+        if(level >= 2 && blink % 2 != 0)
         {
-            // 危险/地震：闪烁
-            if(blink % 2 == 0) OLED_ShowString(40, 4, "DANGER");
-        }
-        else if(level == 2)
-        {
-            // 警告/防盗：闪烁
-            if(blink % 2 == 0) OLED_ShowString(40, 4, "WARN");
-        }
-        else if(level == 1)
-        {
-            // 提示/轻微
-            OLED_ShowString(40, 4, "TIP");
+            // 报警时闪烁：清屏
+            u8g2_ClearBuffer(&u8g2);
+            u8g2_SendBuffer(&u8g2);
         }
         else
         {
-            // 安全
-            OLED_ShowString(40, 4, "OK");
+            OLED_DrawFace_u8g2(level);
         }
-        // 第4行：最大加速度
-        OLED_ShowString(8, 6, "MaxG:"); OLED_ShowNum(64, 6, max_val);
 
         last_ax = ax; last_ay = ay; last_az = az;
         Delay_Ms(200);

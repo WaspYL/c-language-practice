@@ -32,3 +32,4 @@ Debug \
 Peripheral/src \
 Startup \
 User \
+User/u8g2 \

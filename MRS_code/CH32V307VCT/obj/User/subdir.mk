@@ -31,5 +31,5 @@ DIR_EXPANDS += \
 
 # Each subdirectory must supply rules for building sources it contributes
 User/%.o: ../User/%.c
-	@	riscv-none-embed-gcc -march=rv32imacxw -mabi=ilp32 -msmall-data-limit=8 -msave-restore -fmax-errors=20 -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common -Wunused -Wuninitialized -g -I"c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/Debug" -I"c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/Core" -I"c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/User" -I"c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/Peripheral/inc" -std=gnu99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -c -o "$@" "$<"
+	@	riscv-none-embed-gcc -march=rv32imacxw -mabi=ilp32 -msmall-data-limit=8 -msave-restore -fmax-errors=20 -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common -Wunused -Wuninitialized -g -I"c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/Debug" -I"c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/Core" -I"c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/User" -I"c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/User/u8g2" -I"c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/Peripheral/inc" -std=gnu99 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -c -o "$@" "$<"
 

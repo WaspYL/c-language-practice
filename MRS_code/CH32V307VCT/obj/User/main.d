@@ -27,7 +27,9 @@ User/main.o: ../User/main.c \
  c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/Peripheral/inc/ch32v30x_wwdg.h \
  c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/User/ch32v30x_it.h \
  c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/Debug/debug.h \
- c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/Peripheral/inc/ch32v30x_misc.h
+ c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/Peripheral/inc/ch32v30x_misc.h \
+ c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/User/u8g2/u8g2.h \
+ c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/User/u8g2/u8x8.h
 
 c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/Peripheral/inc/ch32v30x.h:
 
@@ -86,3 +88,7 @@ c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/User/ch32v30x_i
 c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/Debug/debug.h:
 
 c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/Peripheral/inc/ch32v30x_misc.h:
+
+c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/User/u8g2/u8g2.h:
+
+c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307VCT/User/u8g2/u8x8.h:
