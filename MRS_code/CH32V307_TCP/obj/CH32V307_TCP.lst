@@ -7,8 +7,8 @@ start address 0x00000000
 
 Program Header:
     LOAD off    0x00001000 vaddr 0x00000000 paddr 0x00000000 align 2**12
-         filesz 0x0000bbf4 memsz 0x0000bbf4 flags r-x
-    LOAD off    0x0000d000 vaddr 0x20000000 paddr 0x0000bbf4 align 2**12
+         filesz 0x0000bbf0 memsz 0x0000bbf0 flags r-x
+    LOAD off    0x0000d000 vaddr 0x20000000 paddr 0x0000bbf0 align 2**12
          filesz 0x000000a0 memsz 0x0000470c flags rw-
     LOAD off    0x0000d800 vaddr 0x20007800 paddr 0x20007800 align 2**12
          filesz 0x00000000 memsz 0x00000800 flags rw-
@@ -17,12 +17,12 @@ Sections:
 Idx Name           Size      VMA       LMA       File off  Algn  Flags
   0 .init          00000004  00000000  00000000  00001000  2**1  CONTENTS, ALLOC, LOAD, READONLY, CODE
   1 .vector        000001bc  00000004  00000004  00001004  2**1  CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .text          0000ba34  000001c0  000001c0  000011c0  2**2  CONTENTS, ALLOC, LOAD, READONLY, CODE
-  3 .fini          00000000  0000bbf4  0000bbf4  0000d0a0  2**0  CONTENTS, ALLOC, LOAD, CODE
+  2 .text          0000ba30  000001c0  000001c0  000011c0  2**2  CONTENTS, ALLOC, LOAD, READONLY, CODE
+  3 .fini          00000000  0000bbf0  0000bbf0  0000d0a0  2**0  CONTENTS, ALLOC, LOAD, CODE
   4 .dalign        00000000  20000000  20000000  0000d0a0  2**0  CONTENTS
-  5 .dlalign       00000000  0000bbf4  0000bbf4  0000d0a0  2**0  CONTENTS
-  6 .data          000000a0  20000000  0000bbf4  0000d000  2**2  CONTENTS, ALLOC, LOAD, DATA
-  7 .bss           0000466c  200000a0  0000bc94  0000d0a0  2**2  ALLOC
+  5 .dlalign       00000000  0000bbf0  0000bbf0  0000d0a0  2**0  CONTENTS
+  6 .data          000000a0  20000000  0000bbf0  0000d000  2**2  CONTENTS, ALLOC, LOAD, DATA
+  7 .bss           0000466c  200000a0  0000bc90  0000d0a0  2**2  ALLOC
   8 .stack         00000800  20007800  20007800  0000d800  2**0  ALLOC
   9 .debug_info    000bef8a  00000000  00000000  0000d0a0  2**0  CONTENTS, READONLY, DEBUGGING
  10 .debug_abbrev  00005950  00000000  00000000  000cc02a  2**0  CONTENTS, READONLY, DEBUGGING
@@ -37,9 +37,9 @@ SYMBOL TABLE:
 00000000 l    d  .init	00000000 .init
 00000004 l    d  .vector	00000000 .vector
 000001c0 l    d  .text	00000000 .text
-0000bbf4 l    d  .fini	00000000 .fini
+0000bbf0 l    d  .fini	00000000 .fini
 20000000 l    d  .dalign	00000000 .dalign
-0000bbf4 l    d  .dlalign	00000000 .dlalign
+0000bbf0 l    d  .dlalign	00000000 .dlalign
 20000000 l    d  .data	00000000 .data
 200000a0 l    d  .bss	00000000 .bss
 20007800 l    d  .stack	00000000 .stack
@@ -257,7 +257,7 @@ SYMBOL TABLE:
 00000cfc g     F .text	0000000a u8g2_draw_l90_r0
 00006d6c g     F .text	0000004e netif_set_addr
 00000220 g     F .text	000000a8 memset
-0000bb8c g     O .text	00000010 ErrTable
+0000bb88 g     O .text	00000010 ErrTable
 00005036 g     F .text	00000076 WCHNET_SocketConnect
 0000171e g     F .text	00000016 BEEP_On
 20007800 g       .stack	00000000 _heap_end
@@ -352,7 +352,7 @@ SYMBOL TABLE:
 0000259e  w      .text	00000000 DVP_IRQHandler
 000050ac g     F .text	0000000e QueryPingEnable
 20000160 g     O .bss	00000004 tcp_active_pcbs
-0000bb6c g     O .text	00000010 MemNum
+0000bb68 g     O .text	00000010 MemNum
 20000041 g     O .data	00000001 phyPN
 20000820 g       .data	00000000 __global_pointer$
 00001a56 g     F .text	0000006e TIM2_Init
@@ -501,7 +501,7 @@ SYMBOL TABLE:
 000029cc g     F .text	00000018 I2C_Cmd
 00007208 g     F .text	0000007e raw_sendto
 0000a8ce  w    F .text	0000004a printchar
-0000bbbc g     O .text	0000000d tcp_backoff
+0000bbb8 g     O .text	0000000d tcp_backoff
 200000b0 g     O .bss	00000001 socket
 0000174a g     F .text	0000007a I2C2_Init
 000039e4 g     F .text	00000014 WCHNET_MainTask
@@ -623,7 +623,7 @@ SYMBOL TABLE:
 00007092 g     F .text	0000001c pbuf_cat
 200000cc g     O .bss	00000001 PhyPolarityDetect
 000028c6 g     F .text	00000004 GPIO_SetBits
-0000bbf4 g       .dlalign	00000000 _data_lma
+0000bbf0 g       .dlalign	00000000 _data_lma
 0000259e  w      .text	00000000 EXTI3_IRQHandler
 00003da2 g     F .text	0000005a USART_Printf_Init
 0000259e  w      .text	00000000 I2C2_ER_IRQHandler
@@ -690,7 +690,7 @@ SYMBOL TABLE:
 0000259e  w      .text	00000000 DMA2_Channel4_IRQHandler
 0000ae36 g     F .text	00000028 sprintf
 0000259e  w      .text	00000000 USBHS_IRQHandler
-0000bb7c g     O .text	00000010 MemSize
+0000bb78 g     O .text	00000010 MemSize
 0000259e  w      .text	00000000 EXTI0_IRQHandler
 0000259e  w      .text	00000000 DMA2_Channel2_IRQHandler
 00001bf6 g     F .text	0000006c WCHNET_HandleGlobalInt
@@ -2461,7 +2461,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/u8
      8ac:	89b6                	mv	s3,a3
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/u8g2/u8g2_font.c:976
     if ( e == 0x0ffff )
-     8ae:	fff90a13          	addi	s4,s2,-1 # ffff <_data_lma+0x440b>
+     8ae:	fff90a13          	addi	s4,s2,-1 # ffff <_data_lma+0x440f>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/u8g2/u8g2_font.c:971
   u8x8_utf8_init(u8g2_GetU8x8(u8g2));
      8b2:	2389                	jal	df4 <u8x8_utf8_init>
@@ -3123,7 +3123,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/u8
 #else
   if ( x2 == 0xffff )
      ba2:	67c1                	lui	a5,0x10
-     ba4:	fff78713          	addi	a4,a5,-1 # ffff <_data_lma+0x440b>
+     ba4:	fff78713          	addi	a4,a5,-1 # ffff <_data_lma+0x440f>
      ba8:	00ec1463          	bne	s8,a4,bb0 <u8g2_DrawLine+0x90>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/u8g2/u8g2_line.c:75
     x2--;
@@ -3707,7 +3707,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/u8
 u8x8_utf8_init():
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/u8g2/u8x8_8x8.c:287
   u8x8->utf8_state = 0;	/* also reset during u8x8_SetupDefaults() */
-     df4:	02050323          	sb	zero,38(a0) # 10026 <_data_lma+0x4432>
+     df4:	02050323          	sb	zero,38(a0) # 10026 <_data_lma+0x4436>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/u8g2/u8x8_8x8.c:288
 }
      df8:	8082                	ret
@@ -5051,7 +5051,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
     13cc:	c63e                	sw	a5,12(sp)
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:130
             while(!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))
-    13ce:	08248493          	addi	s1,s1,130 # 70082 <_data_lma+0x6448e>
+    13ce:	08248493          	addi	s1,s1,130 # 70082 <_data_lma+0x64492>
     13d2:	80040413          	addi	s0,s0,-2048 # 40005800 <_eusrstack+0x1fffd800>
     13d6:	85a6                	mv	a1,s1
     13d8:	8522                	mv	a0,s0
@@ -5075,7 +5075,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
     13f0:	71090913          	addi	s2,s2,1808 # 2710 <ETH_DMATxDescChainInit+0x1a>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:136
                 while(!I2C_CheckEvent(I2C2, I2C_EVENT_MASTER_BYTE_TRANSMITTED))
-    13f4:	08498993          	addi	s3,s3,132 # 70084 <_data_lma+0x64490>
+    13f4:	08498993          	addi	s3,s3,132 # 70084 <_data_lma+0x64494>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:132
             for(i = 0; i < buf_idx; i++)
     13f8:	88b1c783          	lbu	a5,-1909(gp) # 200000ab <buf_idx.16839>
@@ -5577,7 +5577,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:236
     I2C_InitStruct.I2C_ClockSpeed = 50000;
     178e:	67b1                	lui	a5,0xc
-    1790:	35078793          	addi	a5,a5,848 # c350 <_data_lma+0x75c>
+    1790:	35078793          	addi	a5,a5,848 # c350 <_data_lma+0x760>
     1794:	c83e                	sw	a5,16(sp)
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:237
     I2C_InitStruct.I2C_Mode = I2C_Mode_I2C;
@@ -5699,7 +5699,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
     if(I2C_WaitEvent(I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED, 10000)) goto fail;
     1822:	00070937          	lui	s2,0x70
     1826:	71048593          	addi	a1,s1,1808
-    182a:	08290513          	addi	a0,s2,130 # 70082 <_data_lma+0x6448e>
+    182a:	08290513          	addi	a0,s2,130 # 70082 <_data_lma+0x64492>
     182e:	3f59                	jal	17c4 <I2C_WaitEvent>
     1830:	e121                	bnez	a0,1870 <I2C_WriteReg+0x80>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:258
@@ -5780,7 +5780,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
     if(I2C_WaitEvent(I2C_EVENT_MASTER_MODE_SELECT, 10000)) goto fail;
     189c:	00030937          	lui	s2,0x30
     18a0:	71048593          	addi	a1,s1,1808 # 2710 <ETH_DMATxDescChainInit+0x1a>
-    18a4:	00190513          	addi	a0,s2,1 # 30001 <_data_lma+0x2440d>
+    18a4:	00190513          	addi	a0,s2,1 # 30001 <_data_lma+0x24411>
     18a8:	3f31                	jal	17c4 <I2C_WaitEvent>
     18aa:	ed59                	bnez	a0,1948 <I2C_ReadReg+0xc6>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:273
@@ -5792,7 +5792,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
     if(I2C_WaitEvent(I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED, 10000)) goto fail;
     18b6:	00070a37          	lui	s4,0x70
     18ba:	71048593          	addi	a1,s1,1808
-    18be:	082a0513          	addi	a0,s4,130 # 70082 <_data_lma+0x6448e>
+    18be:	082a0513          	addi	a0,s4,130 # 70082 <_data_lma+0x64492>
     18c2:	3709                	jal	17c4 <I2C_WaitEvent>
     18c4:	e151                	bnez	a0,1948 <I2C_ReadReg+0xc6>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:275
@@ -6055,7 +6055,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
     TIM_TimeBaseStructure.TIM_Period = SystemCoreClock / 1000000;
     1a6c:	8181a783          	lw	a5,-2024(gp) # 20000038 <SystemCoreClock>
     1a70:	000f4737          	lui	a4,0xf4
-    1a74:	24070713          	addi	a4,a4,576 # f4240 <_data_lma+0xe864c>
+    1a74:	24070713          	addi	a4,a4,576 # f4240 <_data_lma+0xe8650>
     1a78:	02e7d7b3          	divu	a5,a5,a4
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:334
     TIM_TimeBaseStructure.TIM_Prescaler = WCHNETTIMERPERIOD * 1000 - 1;
@@ -6894,7 +6894,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:529
     UART4_Init(ESP_BAUD);
     1ea4:	6571                	lui	a0,0x1c
-    1ea6:	20050513          	addi	a0,a0,512 # 1c200 <_data_lma+0x1060c>
+    1ea6:	20050513          	addi	a0,a0,512 # 1c200 <_data_lma+0x10610>
     1eaa:	ebbff0ef          	jal	ra,1d64 <UART4_Init>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:531
     esp_recv_idx = 0;
@@ -7124,7 +7124,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
     2052:	a216                	sh	a3,0(a2)
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:581
             esp_recv_buf[esp_recv_idx] = 0;
-    2054:	00078023          	sb	zero,0(a5) # c0000 <_data_lma+0xb440c>
+    2054:	00078023          	sb	zero,0(a5) # c0000 <_data_lma+0xb4410>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:583
         }
         USART_ClearITPendingBit(UART4, USART_IT_RXNE);
@@ -7270,7 +7270,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:626
     USART_Printf_Init(115200);
     20fe:	6571                	lui	a0,0x1c
-    2100:	20050513          	addi	a0,a0,512 # 1c200 <_data_lma+0x1060c>
+    2100:	20050513          	addi	a0,a0,512 # 1c200 <_data_lma+0x10610>
     2104:	49f010ef          	jal	ra,3da2 <USART_Printf_Init>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:628
 
@@ -7296,7 +7296,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
     212e:	a6450513          	addi	a0,a0,-1436 # ba64 <u8x8_ssd1306_128x64_noname_display_info+0x3b4>
     2132:	52d080ef          	jal	ra,ae5e <puts>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:633
-    printf("[模式] 改代码中NET_MODE宏切换网络模式\r\n");
+    printf("[Mode] Change NET_MODE macro to switch network\r\n");
     2136:	0000c537          	lui	a0,0xc
     213a:	a6c50513          	addi	a0,a0,-1428 # ba6c <u8x8_ssd1306_128x64_noname_display_info+0x3bc>
     213e:	521080ef          	jal	ra,ae5e <puts>
@@ -7311,7 +7311,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:638
     printf("[1/3] Init ADXL...\r\n");
     214a:	0000c537          	lui	a0,0xc
-    214e:	aa050513          	addi	a0,a0,-1376 # baa0 <u8x8_ssd1306_128x64_noname_display_info+0x3f0>
+    214e:	a9c50513          	addi	a0,a0,-1380 # ba9c <u8x8_ssd1306_128x64_noname_display_info+0x3ec>
     2152:	50d080ef          	jal	ra,ae5e <puts>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:639
     if(ADXL345_Init() != 0) printf("[WARN] ADXL Fail\r\n");
@@ -7319,7 +7319,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
     215a:	14050163          	beqz	a0,229c <main+0x1c0>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:639 (discriminator 1)
     215e:	0000c537          	lui	a0,0xc
-    2162:	ab450513          	addi	a0,a0,-1356 # bab4 <u8x8_ssd1306_128x64_noname_display_info+0x404>
+    2162:	ab050513          	addi	a0,a0,-1360 # bab0 <u8x8_ssd1306_128x64_noname_display_info+0x400>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:640
     else printf("[OK] ADXL Ready\r\n");
     2166:	4f9080ef          	jal	ra,ae5e <puts>
@@ -7327,7 +7327,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
 
     printf("[2/3] Init OLED...\r\n");
     216a:	0000c537          	lui	a0,0xc
-    216e:	adc50513          	addi	a0,a0,-1316 # badc <u8x8_ssd1306_128x64_noname_display_info+0x42c>
+    216e:	ad850513          	addi	a0,a0,-1320 # bad8 <u8x8_ssd1306_128x64_noname_display_info+0x428>
     2172:	4ed080ef          	jal	ra,ae5e <puts>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:643
     OLED_Init_u8g2();
@@ -7339,7 +7339,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:645
     printf("[OK] OLED Ready\r\n");
     2180:	0000c537          	lui	a0,0xc
-    2184:	af050513          	addi	a0,a0,-1296 # baf0 <u8x8_ssd1306_128x64_noname_display_info+0x440>
+    2184:	aec50513          	addi	a0,a0,-1300 # baec <u8x8_ssd1306_128x64_noname_display_info+0x43c>
     2188:	4d7080ef          	jal	ra,ae5e <puts>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:648
 
@@ -7358,7 +7358,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
 
     printf("=== Ready ===\r\n\r\n");
     219e:	0000c537          	lui	a0,0xc
-    21a2:	b0450513          	addi	a0,a0,-1276 # bb04 <u8x8_ssd1306_128x64_noname_display_info+0x454>
+    21a2:	b0050513          	addi	a0,a0,-1280 # bb00 <u8x8_ssd1306_128x64_noname_display_info+0x450>
     21a6:	4b9080ef          	jal	ra,ae5e <puts>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:674
         if(hist_idx >= 5) hist_idx = 0;
@@ -7527,7 +7527,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:640
     else printf("[OK] ADXL Ready\r\n");
     229c:	0000c537          	lui	a0,0xc
-    22a0:	ac850513          	addi	a0,a0,-1336 # bac8 <u8x8_ssd1306_128x64_noname_display_info+0x418>
+    22a0:	ac450513          	addi	a0,a0,-1340 # bac4 <u8x8_ssd1306_128x64_noname_display_info+0x414>
     22a4:	b5c9                	j	2166 <main+0x8a>
     22a6:	895a                	mv	s2,s6
     22a8:	8b26                	mv	s6,s1
@@ -7602,26 +7602,26 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
     230e:	01211603          	lh	a2,18(sp)
     2312:	01011583          	lh	a1,16(sp)
     2316:	0000c7b7          	lui	a5,0xc
-    231a:	b1878513          	addi	a0,a5,-1256 # bb18 <u8x8_ssd1306_128x64_noname_display_info+0x468>
+    231a:	b1478513          	addi	a0,a5,-1260 # bb14 <u8x8_ssd1306_128x64_noname_display_info+0x464>
     231e:	8722                	mv	a4,s0
     2320:	2f3080ef          	jal	ra,ae12 <printf>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:708
             if(level == 0)      printf("[SAFE]\r\n");
-    2324:	b30d8513          	addi	a0,s11,-1232 # bb30 <u8x8_ssd1306_128x64_noname_display_info+0x480>
+    2324:	b2cd8513          	addi	a0,s11,-1236 # bb2c <u8x8_ssd1306_128x64_noname_display_info+0x47c>
     2328:	cc89                	beqz	s1,2342 <main+0x266>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:709
             else if(level == 1) printf("[LIGHT]\r\n");
     232a:	4785                	li	a5,1
-    232c:	b38d0513          	addi	a0,s10,-1224 # bb38 <u8x8_ssd1306_128x64_noname_display_info+0x488>
+    232c:	b34d0513          	addi	a0,s10,-1228 # bb34 <u8x8_ssd1306_128x64_noname_display_info+0x484>
     2330:	00f48963          	beq	s1,a5,2342 <main+0x266>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:710
             else if(level == 2) printf("[THEFT]\r\n");
     2334:	4789                	li	a5,2
-    2336:	b44c8513          	addi	a0,s9,-1212 # bb44 <u8x8_ssd1306_128x64_noname_display_info+0x494>
+    2336:	b40c8513          	addi	a0,s9,-1216 # bb40 <u8x8_ssd1306_128x64_noname_display_info+0x490>
     233a:	00f48463          	beq	s1,a5,2342 <main+0x266>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:711
             else                printf("[QUAKE]\r\n");
-    233e:	b50c0513          	addi	a0,s8,-1200 # bb50 <u8x8_ssd1306_128x64_noname_display_info+0x4a0>
+    233e:	b4cc0513          	addi	a0,s8,-1204 # bb4c <u8x8_ssd1306_128x64_noname_display_info+0x49c>
     2342:	31d080ef          	jal	ra,ae5e <puts>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:713
             if(net_connected)
@@ -7634,7 +7634,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/ma
     2356:	01011603          	lh	a2,16(sp)
     235a:	8826                	mv	a6,s1
     235c:	87a2                	mv	a5,s0
-    235e:	b5cb8593          	addi	a1,s7,-1188 # bb5c <u8x8_ssd1306_128x64_noname_display_info+0x4ac>
+    235e:	b58b8593          	addi	a1,s7,-1192 # bb58 <u8x8_ssd1306_128x64_noname_display_info+0x4a8>
     2362:	1808                	addi	a0,sp,48
     2364:	2d3080ef          	jal	ra,ae36 <sprintf>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/main.c:716
@@ -7897,7 +7897,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/sy
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/system_ch32v30x.c:153
       SystemCoreClock = HSI_VALUE;
     248c:	007a1737          	lui	a4,0x7a1
-    2490:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x79560c>
+    2490:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x795610>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/system_ch32v30x.c:215 (discriminator 1)
       if(Pll_6_5 == 1) SystemCoreClock = (SystemCoreClock / 2);
     2494:	c398                	sw	a4,0(a5)
@@ -7962,7 +7962,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/sy
     24ec:	c70d                	beqz	a4,2516 <SystemCoreClockUpdate+0xa2>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/system_ch32v30x.c:177 (discriminator 1)
     24ee:	007a1737          	lui	a4,0x7a1
-    24f2:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x79560c>
+    24f2:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x795610>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/system_ch32v30x.c:210
           SystemCoreClock = SystemCoreClock * pllmull;
     24f6:	02c70633          	mul	a2,a4,a2
@@ -7994,7 +7994,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/sy
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/system_ch32v30x.c:178
           else SystemCoreClock = (HSI_VALUE >> 1) * pllmull;
     2516:	003d1737          	lui	a4,0x3d1
-    251a:	90070713          	addi	a4,a4,-1792 # 3d0900 <_data_lma+0x3c4d0c>
+    251a:	90070713          	addi	a4,a4,-1792 # 3d0900 <_data_lma+0x3c4d10>
     251e:	bfe1                	j	24f6 <SystemCoreClockUpdate+0x82>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/system_ch32v30x.c:194
           if(RCC->CFGR2 & (1<<16)){ /* PLL2 */
@@ -8013,7 +8013,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/sy
     2532:	8b3d                	andi	a4,a4,15
     2534:	00170693          	addi	a3,a4,1
     2538:	007a1737          	lui	a4,0x7a1
-    253c:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x79560c>
+    253c:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x795610>
     2540:	02d75733          	divu	a4,a4,a3
     2544:	c398                	sw	a4,0(a5)
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/system_ch32v30x.c:197
@@ -8072,7 +8072,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../User/sy
     258a:	8b3d                	andi	a4,a4,15
     258c:	00170693          	addi	a3,a4,1 # 40021001 <_eusrstack+0x20019001>
     2590:	007a1737          	lui	a4,0x7a1
-    2594:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x79560c>
+    2594:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x795610>
     2598:	02d75733          	divu	a4,a4,a3
     259c:	b7f1                	j	2568 <SystemCoreClockUpdate+0xf4>
 
@@ -8109,7 +8109,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Startup
 /* Load data section from flash to RAM */
 	la a0, _data_lma
     25b0:	00009517          	auipc	a0,0x9
-    25b4:	64450513          	addi	a0,a0,1604 # bbf4 <_data_lma>
+    25b4:	64050513          	addi	a0,a0,1600 # bbf0 <_data_lma>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Startup/startup_ch32v30x_D8C.S:336
 	la a1, _data_vma
     25b8:	1fffe597          	auipc	a1,0x1fffe
@@ -8217,7 +8217,7 @@ uint32_t DBGMCU_GetCHIPID( void )
     return( *( uint32_t * )0x1FFFF704 );
 }
     262e:	1ffff7b7          	lui	a5,0x1ffff
-    2632:	7047a503          	lw	a0,1796(a5) # 1ffff704 <_data_lma+0x1fff3b10>
+    2632:	7047a503          	lw	a0,1796(a5) # 1ffff704 <_data_lma+0x1fff3b14>
     2636:	8082                	ret
 
 00002638 <ETH_DeInit>:
@@ -8469,7 +8469,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Periphe
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_eth.c:720
 
         if(i < (TxBuffCount - 1))
-    2706:	fff60e13          	addi	t3,a2,-1 # ffff <_data_lma+0x440b>
+    2706:	fff60e13          	addi	t3,a2,-1 # ffff <_data_lma+0x440f>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_eth.c:714 (discriminator 1)
     for(i = 0; i < TxBuffCount; i++)
     270a:	00c79663          	bne	a5,a2,2716 <ETH_DMATxDescChainInit+0x20>
@@ -8490,7 +8490,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Periphe
     2716:	026786b3          	mul	a3,a5,t1
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_eth.c:717
         DMATxDesc->Status = ETH_DMATxDesc_TCH | ETH_DMATxDesc_IC;
-    271a:	01172023          	sw	a7,0(a4) # 10000 <_data_lma+0x440c>
+    271a:	01172023          	sw	a7,0(a4) # 10000 <_data_lma+0x4410>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_eth.c:718
         DMATxDesc->Buffer1Addr = (uint32_t)(&TxBuff[i * ETH_MAX_PACKET_SIZE]);
     271e:	882a                	mv	a6,a0
@@ -8996,7 +8996,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Periphe
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_i2c.c:139
     freqrange = (uint16_t)(pclk1 / 1000000);
     28e0:	000f4737          	lui	a4,0xf4
-    28e4:	24070713          	addi	a4,a4,576 # f4240 <_data_lma+0xe864c>
+    28e4:	24070713          	addi	a4,a4,576 # f4240 <_data_lma+0xe8650>
     28e8:	02e7d733          	divu	a4,a5,a4
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_i2c.c:135
     tmpreg = I2Cx->CTLR2;
@@ -9033,7 +9033,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Periphe
 
     if(I2C_InitStruct->I2C_ClockSpeed <= 100000)
     2912:	6561                	lui	a0,0x18
-    2914:	6a050513          	addi	a0,a0,1696 # 186a0 <_data_lma+0xcaac>
+    2914:	6a050513          	addi	a0,a0,1696 # 186a0 <_data_lma+0xcab0>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_i2c.c:147
     I2Cx->CTLR1 &= CTLR1_PE_Reset;
     2918:	06c2                	slli	a3,a3,0x10
@@ -9487,7 +9487,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Periphe
         case 0x00:
             RCC_Clocks->SYSCLK_Frequency = HSI_VALUE;
     2ac4:	007a17b7          	lui	a5,0x7a1
-    2ac8:	20078793          	addi	a5,a5,512 # 7a1200 <_data_lma+0x79560c>
+    2ac8:	20078793          	addi	a5,a5,512 # 7a1200 <_data_lma+0x795610>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_rcc.c:668
 
 #endif
@@ -9588,7 +9588,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Periphe
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_rcc.c:603
             if(((*(uint32_t *)0x1FFFF70C) & (1 << 14)) != (1 << 14))
     2b2e:	1ffff6b7          	lui	a3,0x1ffff
-    2b32:	70c6a683          	lw	a3,1804(a3) # 1ffff70c <_data_lma+0x1fff3b18>
+    2b32:	70c6a683          	lw	a3,1804(a3) # 1ffff70c <_data_lma+0x1fff3b1c>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_rcc.c:601
             pllmull = (pllmull >> 18) + 2;
     2b36:	8bbd                	andi	a5,a5,15
@@ -9642,7 +9642,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Periphe
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_rcc.c:627
                     RCC_Clocks->SYSCLK_Frequency = (HSI_VALUE)*pllmull;
     2b78:	007a1737          	lui	a4,0x7a1
-    2b7c:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x79560c>
+    2b7c:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x795610>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_rcc.c:662
                 RCC_Clocks->SYSCLK_Frequency = RCC_Clocks->SYSCLK_Frequency * pllmull;
     2b80:	02f707b3          	mul	a5,a4,a5
@@ -9674,7 +9674,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Periphe
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_rcc.c:631
                     RCC_Clocks->SYSCLK_Frequency = (HSI_VALUE >> 1) * pllmull;
     2b9e:	003d1737          	lui	a4,0x3d1
-    2ba2:	90070713          	addi	a4,a4,-1792 # 3d0900 <_data_lma+0x3c4d0c>
+    2ba2:	90070713          	addi	a4,a4,-1792 # 3d0900 <_data_lma+0x3c4d10>
     2ba6:	bfe9                	j	2b80 <RCC_GetClocksFreq+0xd0>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_rcc.c:646
                 if(RCC->CFGR2 & (1<<16)){ /* PLL2 */
@@ -9693,7 +9693,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Periphe
     2bba:	8b3d                	andi	a4,a4,15
     2bbc:	00170693          	addi	a3,a4,1
     2bc0:	007a1737          	lui	a4,0x7a1
-    2bc4:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x79560c>
+    2bc4:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x795610>
     2bc8:	02d75733          	divu	a4,a4,a3
     2bcc:	c118                	sw	a4,0(a0)
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_rcc.c:649
@@ -9752,7 +9752,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Periphe
     2c12:	8b3d                	andi	a4,a4,15
     2c14:	00170693          	addi	a3,a4,1 # 40021001 <_eusrstack+0x20019001>
     2c18:	007a1737          	lui	a4,0x7a1
-    2c1c:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x79560c>
+    2c1c:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x795610>
     2c20:	02d75733          	divu	a4,a4,a3
     2c24:	b7f1                	j	2bf0 <RCC_GetClocksFreq+0x140>
 
@@ -10035,7 +10035,7 @@ void TIM_TimeBaseInit(TIM_TypeDef *TIMx, TIM_TimeBaseInitTypeDef *TIM_TimeBaseIn
     uint32_t temper1 = 0;
     temper1 = ((*( uint32_t * )0x1FFFF704) & 0x000000F0) >> 4;
     2d12:	1ffff737          	lui	a4,0x1ffff
-    2d16:	70472703          	lw	a4,1796(a4) # 1ffff704 <_data_lma+0x1fff3b10>
+    2d16:	70472703          	lw	a4,1796(a4) # 1ffff704 <_data_lma+0x1fff3b14>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Peripheral/src/ch32v30x_tim.c:111
     tmpcr1 = TIMx->CTLR1;
     2d1a:	211e                	lhu	a5,0(a0)
@@ -10837,7 +10837,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/
     3012:	4781                	li	a5,0
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/eth_driver_10M.c:92
         *p = *macaddr;
-    3014:	7ed70713          	addi	a4,a4,2029 # 1ffff7ed <_data_lma+0x1fff3bf9>
+    3014:	7ed70713          	addi	a4,a4,2029 # 1ffff7ed <_data_lma+0x1fff3bfd>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/eth_driver_10M.c:90
     for(i=0;i<6;i++)
     3018:	4699                	li	a3,6
@@ -11468,10 +11468,10 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/
     34d2:	8b018613          	addi	a2,gp,-1872 # 200000d0 <RandVal>
     34d6:	421c                	lw	a5,0(a2)
     34d8:	000345b7          	lui	a1,0x34
-    34dc:	40158593          	addi	a1,a1,1025 # 34401 <_data_lma+0x2880d>
+    34dc:	40158593          	addi	a1,a1,1025 # 34401 <_data_lma+0x28811>
     34e0:	02b787b3          	mul	a5,a5,a1
     34e4:	0026a5b7          	lui	a1,0x26a
-    34e8:	ec958593          	addi	a1,a1,-311 # 269ec9 <_data_lma+0x25e2d5>
+    34e8:	ec958593          	addi	a1,a1,-311 # 269ec9 <_data_lma+0x25e2d9>
     34ec:	97ae                	add	a5,a5,a1
     34ee:	c21c                	sw	a5,0(a2)
     34f0:	06400613          	li	a2,100
@@ -12059,7 +12059,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/eth_driver_10M.c:598
     ETH->MMCRIMR = ETH_MMCRIMR_RGUFM | ETH_MMCRIMR_RFCEM;
     38cc:	000207b7          	lui	a5,0x20
-    38d0:	02078793          	addi	a5,a5,32 # 20020 <_data_lma+0x1442c>
+    38d0:	02078793          	addi	a5,a5,32 # 20020 <_data_lma+0x14430>
     38d4:	10f42623          	sw	a5,268(s0)
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/eth_driver_10M.c:600
     ETH_DMAITConfig(ETH_DMA_IT_NIS |\
@@ -12265,7 +12265,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/eth_driver_10M.c:651
     ETH->MACCR = (uint32_t)(ETH_InitStruct->ETH_Watchdog |
     3a20:	001006b7          	lui	a3,0x100
-    3a24:	20068693          	addi	a3,a3,512 # 100200 <_data_lma+0xf460c>
+    3a24:	20068693          	addi	a3,a3,512 # 100200 <_data_lma+0xf4610>
     3a28:	8fd5                	or	a5,a5,a3
     3a2a:	c31c                	sw	a5,0(a4)
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/eth_driver_10M.c:660
@@ -12559,7 +12559,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/
     3b70:	1086a823          	sw	s0,272(a3) # 40028110 <_eusrstack+0x20020110>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/eth_driver_10M.c:782
     ETH->MMCRIMR = ETH_MMCRIMR_RGUFM | ETH_MMCRIMR_RFCEM;
-    3b74:	02078793          	addi	a5,a5,32 # 20020 <_data_lma+0x1442c>
+    3b74:	02078793          	addi	a5,a5,32 # 20020 <_data_lma+0x14430>
     3b78:	10f6a623          	sw	a5,268(a3)
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/eth_driver_10M.c:784
     ETH_DMAITConfig(ETH_DMA_IT_NIS |\
@@ -12708,10 +12708,10 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/
     3c24:	3058                	lbu	a4,5(s0)
     3c26:	8fb9                	xor	a5,a5,a4
     3c28:	00034737          	lui	a4,0x34
-    3c2c:	40170713          	addi	a4,a4,1025 # 34401 <_data_lma+0x2880d>
+    3c2c:	40170713          	addi	a4,a4,1025 # 34401 <_data_lma+0x28811>
     3c30:	02e787b3          	mul	a5,a5,a4
     3c34:	0026a737          	lui	a4,0x26a
-    3c38:	ec970713          	addi	a4,a4,-311 # 269ec9 <_data_lma+0x25e2d5>
+    3c38:	ec970713          	addi	a4,a4,-311 # 269ec9 <_data_lma+0x25e2d9>
     3c3c:	97ba                	add	a5,a5,a4
     3c3e:	8af1a823          	sw	a5,-1872(gp) # 200000d0 <RandVal>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/eth_driver_10M.c:900
@@ -12815,7 +12815,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/eth_driver_10M.c:931
     cfg.CheckValid = WCHNET_CFG_VALID;
     3cd6:	123457b7          	lui	a5,0x12345
-    3cda:	67878793          	addi	a5,a5,1656 # 12345678 <_data_lma+0x12339a84>
+    3cda:	67878793          	addi	a5,a5,1656 # 12345678 <_data_lma+0x12339a88>
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../NetLib/eth_driver_10M.c:917
 {
     3cde:	892a                	mv	s2,a0
@@ -12872,7 +12872,7 @@ void Delay_Init(void)
     p_us = SystemCoreClock / 8000000;
     3d10:	8181a783          	lw	a5,-2024(gp) # 20000038 <SystemCoreClock>
     3d14:	007a1737          	lui	a4,0x7a1
-    3d18:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x79560c>
+    3d18:	20070713          	addi	a4,a4,512 # 7a1200 <_data_lma+0x795610>
     3d1c:	02e7d7b3          	divu	a5,a5,a4
     3d20:	0ff7f793          	andi	a5,a5,255
     3d24:	8cf18b23          	sb	a5,-1834(gp) # 200000f6 <p_us>
@@ -13147,7 +13147,7 @@ c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Debug/d
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Debug/debug.c:231 (discriminator 2)
         USART_SendData(USART1, *buf++);
     3e24:	008987b3          	add	a5,s3,s0
-    3e28:	00078583          	lb	a1,0(a5) # 80000 <_data_lma+0x7440c>
+    3e28:	00078583          	lb	a1,0(a5) # 80000 <_data_lma+0x74410>
     3e2c:	8526                	mv	a0,s1
 c:\Users\WaspYL\Desktop\c-language-practice\MRS_code\CH32V307_TCP\obj/../Debug/debug.c:227 (discriminator 2)
     for(i = 0; i < size; i++)
@@ -13288,7 +13288,7 @@ WCHNET_PeriodicHandle():
     3f36:	46b2                	lw	a3,12(sp)
     3f38:	8e99                	sub	a3,a3,a4
     3f3a:	673d                	lui	a4,0xf
-    3f3c:	a5f70713          	addi	a4,a4,-1441 # ea5f <_data_lma+0x2e6b>
+    3f3c:	a5f70713          	addi	a4,a4,-1441 # ea5f <_data_lma+0x2e6f>
     3f40:	00d77963          	bgeu	a4,a3,3f52 <WCHNET_PeriodicHandle+0x106>
     3f44:	4732                	lw	a4,12(sp)
     3f46:	5b848493          	addi	s1,s1,1464
@@ -13303,7 +13303,7 @@ WCHNET_PeriodicHandle():
     3f5c:	4732                	lw	a4,12(sp)
     3f5e:	8f1d                	sub	a4,a4,a5
     3f60:	67bd                	lui	a5,0xf
-    3f62:	a5f78793          	addi	a5,a5,-1441 # ea5f <_data_lma+0x2e6b>
+    3f62:	a5f78793          	addi	a5,a5,-1441 # ea5f <_data_lma+0x2e6f>
     3f66:	00e7f563          	bgeu	a5,a4,3f70 <WCHNET_PeriodicHandle+0x124>
     3f6a:	2c95                	jal	41de <SelIPARPSend>
     3f6c:	47b2                	lw	a5,12(sp)
@@ -13487,7 +13487,7 @@ WCHNET_Tx():
 00004146 <GetChipID>:
 GetChipID():
     4146:	1ffff7b7          	lui	a5,0x1ffff
-    414a:	7067d503          	lhu	a0,1798(a5) # 1ffff706 <_data_lma+0x1fff3b12>
+    414a:	7067d503          	lhu	a0,1798(a5) # 1ffff706 <_data_lma+0x1fff3b16>
     414e:	0f057513          	andi	a0,a0,240
     4152:	8082                	ret
 
@@ -13904,7 +13904,7 @@ ErrorEncode():
     457c:	c919                	beqz	a0,4592 <ErrorEncode+0x16>
     457e:	40a00533          	neg	a0,a0
     4582:	67b1                	lui	a5,0xc
-    4584:	b8c78793          	addi	a5,a5,-1140 # bb8c <ErrTable>
+    4584:	b8878793          	addi	a5,a5,-1144 # bb88 <ErrTable>
     4588:	0ff57513          	andi	a0,a0,255
     458c:	953e                	add	a0,a0,a5
     458e:	2108                	lbu	a0,0(a0)
@@ -14018,7 +14018,7 @@ WCHNET_ConfigKeepLive():
 WCHNET_ConfigLIB():
     46a4:	5518                	lw	a4,40(a0)
     46a6:	123457b7          	lui	a5,0x12345
-    46aa:	67878793          	addi	a5,a5,1656 # 12345678 <_data_lma+0x12339a84>
+    46aa:	67878793          	addi	a5,a5,1656 # 12345678 <_data_lma+0x12339a88>
     46ae:	12f71a63          	bne	a4,a5,47e2 <WCHNET_ConfigLIB+0x13e>
     46b2:	b25fb2ef          	jal	t0,1d6 <__riscv_save_4>
     46b6:	511c                	lw	a5,32(a0)
@@ -14045,8 +14045,8 @@ WCHNET_ConfigLIB():
     46fc:	67448793          	addi	a5,s1,1652
     4700:	eb25                	bnez	a4,4770 <WCHNET_ConfigLIB+0xcc>
     4702:	66b1                	lui	a3,0xc
-    4704:	b6c6d703          	lhu	a4,-1172(a3) # bb6c <MemNum>
-    4708:	b6c68693          	addi	a3,a3,-1172
+    4704:	b686d703          	lhu	a4,-1176(a3) # bb68 <MemNum>
+    4708:	b6868693          	addi	a3,a3,-1176
     470c:	22ae                	lhu	a1,2(a3)
     470e:	972e                	add	a4,a4,a1
     4710:	22ce                	lhu	a1,4(a3)
@@ -15787,7 +15787,7 @@ low_level_output():
     595c:	895fa2ef          	jal	t0,1f0 <__riscv_save_0>
     5960:	64b1                	lui	s1,0xc
     5962:	842e                	mv	s0,a1
-    5964:	35148493          	addi	s1,s1,849 # c351 <_data_lma+0x75d>
+    5964:	35148493          	addi	s1,s1,849 # c351 <_data_lma+0x761>
     5968:	e70ff0ef          	jal	ra,4fd8 <WCHNET_GetPHYStatus>
     596c:	8911                	andi	a0,a0,4
     596e:	cd15                	beqz	a0,59aa <low_level_output+0x4e>
@@ -15930,7 +15930,7 @@ htonl():
     5ac2:	8f75                	and	a4,a4,a3
     5ac4:	8fd9                	or	a5,a5,a4
     5ac6:	6741                	lui	a4,0x10
-    5ac8:	f0070713          	addi	a4,a4,-256 # ff00 <_data_lma+0x430c>
+    5ac8:	f0070713          	addi	a4,a4,-256 # ff00 <_data_lma+0x4310>
     5acc:	8121                	srli	a0,a0,0x8
     5ace:	8d79                	and	a0,a0,a4
     5ad0:	8d5d                	or	a0,a0,a5
@@ -18641,7 +18641,7 @@ tcp_slowtmr():
     75c4:	94c18413          	addi	s0,gp,-1716 # 2000016c <tcp_ticks>
     75c8:	94018993          	addi	s3,gp,-1728 # 20000160 <tcp_active_pcbs>
     75cc:	4c8d                	li	s9,3
-    75ce:	bbca8a93          	addi	s5,s5,-1092 # bbbc <tcp_backoff>
+    75ce:	bb8a8a93          	addi	s5,s5,-1096 # bbb8 <tcp_backoff>
     75d2:	87418b13          	addi	s6,gp,-1932 # 20000094 <tcp_persist_backoff>
     75d6:	000d1a63          	bnez	s10,75ea <tcp_slowtmr+0x50>
     75da:	9581a403          	lw	s0,-1704(gp) # 20000178 <tcp_tw_pcbs>
@@ -18892,7 +18892,7 @@ tcp_close():
     78ce:	923f82ef          	jal	t0,1f0 <__riscv_save_0>
     78d2:	6731                	lui	a4,0xc
     78d4:	078a                	slli	a5,a5,0x2
-    78d6:	b9c70713          	addi	a4,a4,-1124 # bb9c <ErrTable+0x10>
+    78d6:	b9870713          	addi	a4,a4,-1128 # bb98 <ErrTable+0x10>
     78da:	97ba                	add	a5,a5,a4
     78dc:	439c                	lw	a5,0(a5)
     78de:	842a                	mv	s0,a0
@@ -19399,7 +19399,7 @@ tcp_oos_insert_segment():
     7df4:	8905                	andi	a0,a0,1
     7df6:	e929                	bnez	a0,7e48 <tcp_oos_insert_segment+0x6a>
     7df8:	6941                	lui	s2,0x10
-    7dfa:	fc090913          	addi	s2,s2,-64 # ffc0 <_data_lma+0x43cc>
+    7dfa:	fc090913          	addi	s2,s2,-64 # ffc0 <_data_lma+0x43d0>
     7dfe:	010a2703          	lw	a4,16(s4)
     7e02:	9701a603          	lw	a2,-1680(gp) # 20000190 <seqno>
     7e06:	24de                	lhu	a5,12(s1)
@@ -19649,7 +19649,7 @@ tcp_receive():
     80c2:	0922                	slli	s2,s2,0x8
     80c4:	00a96933          	or	s2,s2,a0
     80c8:	6541                	lui	a0,0x10
-    80ca:	fc050513          	addi	a0,a0,-64 # ffc0 <_data_lma+0x43cc>
+    80ca:	fc050513          	addi	a0,a0,-64 # ffc0 <_data_lma+0x43d0>
     80ce:	9c7fd0ef          	jal	ra,5a94 <htons>
     80d2:	489c                	lw	a5,16(s1)
     80d4:	00a97933          	and	s2,s2,a0
@@ -19708,7 +19708,7 @@ tcp_receive():
     815c:	34051763          	bnez	a0,84aa <tcp_receive+0x5fe>
     8160:	08442b03          	lw	s6,132(s0)
     8164:	6bc1                	lui	s7,0x10
-    8166:	fc0b8b93          	addi	s7,s7,-64 # ffc0 <_data_lma+0x43cc>
+    8166:	fc0b8b93          	addi	s7,s7,-64 # ffc0 <_data_lma+0x43d0>
     816a:	0009a503          	lw	a0,0(s3)
     816e:	000a5703          	lhu	a4,0(s4)
     8172:	972a                	add	a4,a4,a0
@@ -20932,7 +20932,7 @@ tcp_input():
     8ec0:	f6f76ee3          	bltu	a4,a5,8e3c <tcp_input+0x5a6>
     8ec4:	6731                	lui	a4,0xc
     8ec6:	078a                	slli	a5,a5,0x2
-    8ec8:	bcc70713          	addi	a4,a4,-1076 # bbcc <tcp_backoff+0x10>
+    8ec8:	bc870713          	addi	a4,a4,-1080 # bbc8 <tcp_backoff+0x10>
     8ecc:	97ba                	add	a5,a5,a4
     8ece:	439c                	lw	a5,0(a5)
     8ed0:	8782                	jr	a5
@@ -21319,7 +21319,7 @@ tcp_output_set_header.isra.0.constprop.1():
     931c:	a43c                	sb	a5,10(s0)
     931e:	8cc9                	or	s1,s1,a0
     9320:	6541                	lui	a0,0x10
-    9322:	fc050513          	addi	a0,a0,-64 # ffc0 <_data_lma+0x43cc>
+    9322:	fc050513          	addi	a0,a0,-64 # ffc0 <_data_lma+0x43d0>
     9326:	f6efc0ef          	jal	ra,5a94 <htons>
     932a:	8ce9                	and	s1,s1,a0
     932c:	4541                	li	a0,16
@@ -21407,7 +21407,7 @@ tcp_enqueue():
     940a:	674d0d13          	addi	s10,s10,1652
     940e:	faf4fee3          	bgeu	s1,a5,93ca <tcp_enqueue+0x32>
     9412:	6741                	lui	a4,0x10
-    9414:	ffc70693          	addi	a3,a4,-4 # fffc <_data_lma+0x4408>
+    9414:	ffc70693          	addi	a3,a4,-4 # fffc <_data_lma+0x440c>
     9418:	fa96e9e3          	bltu	a3,s1,93ca <tcp_enqueue+0x32>
     941c:	4792                	lw	a5,4(sp)
     941e:	8230                	lhu	a2,4(sp)
@@ -21690,7 +21690,7 @@ tcp_enqueue():
     9708:	001b7793          	andi	a5,s6,1
     970c:	c7cd                	beqz	a5,97b6 <tcp_enqueue+0x41e>
     970e:	010a2783          	lw	a5,16(s4)
-    9712:	00d7cb83          	lbu	s7,13(a5) # 1000d <_data_lma+0x4419>
+    9712:	00d7cb83          	lbu	s7,13(a5) # 1000d <_data_lma+0x441d>
     9716:	27c8                	lbu	a0,12(a5)
     9718:	0ba2                	slli	s7,s7,0x8
     971a:	00abebb3          	or	s7,s7,a0
@@ -22223,7 +22223,7 @@ tcp_rst():
     9c70:	a43c                	sb	a5,10(s0)
     9c72:	8cc9                	or	s1,s1,a0
     9c74:	6541                	lui	a0,0x10
-    9c76:	fc050513          	addi	a0,a0,-64 # ffc0 <_data_lma+0x43cc>
+    9c76:	fc050513          	addi	a0,a0,-64 # ffc0 <_data_lma+0x43d0>
     9c7a:	e1bfb0ef          	jal	ra,5a94 <htons>
     9c7e:	8ce9                	and	s1,s1,a0
     9c80:	4551                	li	a0,20
@@ -22463,7 +22463,7 @@ tcp_zero_window_probe():
     9ed4:	255c                	lbu	a5,12(a0)
     9ed6:	6541                	lui	a0,0x10
     9ed8:	0422                	slli	s0,s0,0x8
-    9eda:	fc050513          	addi	a0,a0,-64 # ffc0 <_data_lma+0x43cc>
+    9eda:	fc050513          	addi	a0,a0,-64 # ffc0 <_data_lma+0x43d0>
     9ede:	8c5d                	or	s0,s0,a5
     9ee0:	bb5fb0ef          	jal	ra,5a94 <htons>
     9ee4:	8c69                	and	s0,s0,a0
@@ -23148,7 +23148,7 @@ icmp_input():
     a59e:	8f5d                	or	a4,a4,a5
     a5a0:	347c                	lbu	a5,15(s0)
     a5a2:	653d                	lui	a0,0xf
-    a5a4:	7ff50513          	addi	a0,a0,2047 # f7ff <_data_lma+0x3c0b>
+    a5a4:	7ff50513          	addi	a0,a0,2047 # f7ff <_data_lma+0x3c0f>
     a5a8:	07e2                	slli	a5,a5,0x18
     a5aa:	8fd9                	or	a5,a5,a4
     a5ac:	2818                	lbu	a4,16(s0)
@@ -23285,7 +23285,7 @@ lwip_standard_chksum():
     a702:	07a2                	slli	a5,a5,0x8
     a704:	973e                	add	a4,a4,a5
     a706:	6541                	lui	a0,0x10
-    a708:	fff50693          	addi	a3,a0,-1 # ffff <_data_lma+0x440b>
+    a708:	fff50693          	addi	a3,a0,-1 # ffff <_data_lma+0x440f>
     a70c:	01075793          	srli	a5,a4,0x10
     a710:	8f75                	and	a4,a4,a3
     a712:	00e78533          	add	a0,a5,a4
@@ -23384,7 +23384,7 @@ inet_chksum_pseudo():
     a802:	8141                	srli	a0,a0,0x10
     a804:	0141                	addi	sp,sp,16
     a806:	9fbf506f          	j	200 <__riscv_restore_10>
-    a80a:	00a95583          	lhu	a1,10(s2) # 1000a <_data_lma+0x4416>
+    a80a:	00a95583          	lhu	a1,10(s2) # 1000a <_data_lma+0x441a>
     a80e:	00492503          	lw	a0,4(s2)
     a812:	c636                	sw	a3,12(sp)
     a814:	eb5ff0ef          	jal	ra,a6c8 <lwip_standard_chksum>
@@ -23474,7 +23474,7 @@ printchar():
     a8e2:	4685                	li	a3,1
     a8e4:	00d71b63          	bne	a4,a3,a8fa <printchar+0x2c>
     a8e8:	4798                	lw	a4,8(a5)
-    a8ea:	00070023          	sb	zero,0(a4) # 10000 <_data_lma+0x440c>
+    a8ea:	00070023          	sb	zero,0(a4) # 10000 <_data_lma+0x4410>
     a8ee:	0007a223          	sw	zero,4(a5)
     a8f2:	4505                	li	a0,1
     a8f4:	40f2                	lw	ra,28(sp)
@@ -23670,7 +23670,7 @@ printInt():
     aacc:	87ce                	mv	a5,s3
     aace:	b771                	j	aa5a <printInt+0x62>
     aad0:	02d00713          	li	a4,45
-    aad4:	fee98fa3          	sb	a4,-1(s3) # ffff <_data_lma+0x440b>
+    aad4:	fee98fa3          	sb	a4,-1(s3) # ffff <_data_lma+0x440f>
     aad8:	4401                	li	s0,0
     aada:	ffe78993          	addi	s3,a5,-2
     aade:	bf55                	j	aa92 <printInt+0x9a>
@@ -23711,7 +23711,7 @@ print():
     ab18:	02500b93          	li	s7,37
     ab1c:	02b00a93          	li	s5,43
     ab20:	4c29                	li	s8,10
-    ab22:	becb0b13          	addi	s6,s6,-1044 # bbec <tcp_backoff+0x30>
+    ab22:	be8b0b13          	addi	s6,s6,-1048 # bbe8 <tcp_backoff+0x30>
     ab26:	00090583          	lb	a1,0(s2)
     ab2a:	e58d                	bnez	a1,ab54 <print+0x62>
     ab2c:	00098663          	beqz	s3,ab38 <print+0x46>
@@ -24323,37 +24323,37 @@ strstr():
     ba30:	3233 3356 3730 5620 6269 6172 6974 6e6f     32V307 Vibration
     ba40:	4d20 6e6f 7469 726f 0000 0000 2820 5445      Monitor.... (ET
     ba50:	2948 0000 2820 6957 6946 0029 2820 4f4e     H).. (WiFi). (NO
-    ba60:	454e 0029 3d20 3d3d 000d 0000 e65b a1a8     NE). ===....[...
-    ba70:	bce5 5d8f e620 b994 bbe4 e7a3 81a0 b8e4     ...] ...........
-    ba80:	4ead 5445 4d5f 444f e545 8fae 88e5 e687     .NET_MODE.......
-    ba90:	a28d bde7 e791 9cbb a8e6 e5a1 8fbc 000d     ................
-    baa0:	315b 332f 205d 6e49 7469 4120 5844 2e4c     [1/3] Init ADXL.
-    bab0:	2e2e 000d 575b 5241 5d4e 4120 5844 204c     ....[WARN] ADXL 
-    bac0:	6146 6c69 000d 0000 4f5b 5d4b 4120 5844     Fail....[OK] ADX
-    bad0:	204c 6552 6461 0d79 0000 0000 325b 332f     L Ready.....[2/3
-    bae0:	205d 6e49 7469 4f20 454c 2e44 2e2e 000d     ] Init OLED.....
-    baf0:	4f5b 5d4b 4f20 454c 2044 6552 6461 0d79     [OK] OLED Ready.
-    bb00:	0000 0000 3d3d 203d 6552 6461 2079 3d3d     ....=== Ready ==
-    bb10:	0d3d 0d0a 0000 0000 3a58 6425 5920 253a     =.......X:%d Y:%
-    bb20:	2064 3a5a 6425 4420 6669 3a66 6425 0020     d Z:%d Diff:%d .
-    bb30:	535b 4641 5d45 000d 4c5b 4749 5448 0d5d     [SAFE]..[LIGHT].
-    bb40:	0000 0000 545b 4548 5446 0d5d 0000 0000     ....[THEFT].....
-    bb50:	515b 4155 454b 0d5d 0000 0000 6425 252c     [QUAKE].....%d,%
-    bb60:	2c64 6425 252c 2c64 6425 000a               d,%d,%d,%d..
+    ba60:	454e 0029 3d20 3d3d 000d 0000 4d5b 646f     NE). ===....[Mod
+    ba70:	5d65 4320 6168 676e 2065 454e 5f54 4f4d     e] Change NET_MO
+    ba80:	4544 6d20 6361 6f72 7420 206f 7773 7469     DE macro to swit
+    ba90:	6863 6e20 7465 6f77 6b72 000d 315b 332f     ch network..[1/3
+    baa0:	205d 6e49 7469 4120 5844 2e4c 2e2e 000d     ] Init ADXL.....
+    bab0:	575b 5241 5d4e 4120 5844 204c 6146 6c69     [WARN] ADXL Fail
+    bac0:	000d 0000 4f5b 5d4b 4120 5844 204c 6552     ....[OK] ADXL Re
+    bad0:	6461 0d79 0000 0000 325b 332f 205d 6e49     ady.....[2/3] In
+    bae0:	7469 4f20 454c 2e44 2e2e 000d 4f5b 5d4b     it OLED.....[OK]
+    baf0:	4f20 454c 2044 6552 6461 0d79 0000 0000      OLED Ready.....
+    bb00:	3d3d 203d 6552 6461 2079 3d3d 0d3d 0d0a     === Ready ===...
+    bb10:	0000 0000 3a58 6425 5920 253a 2064 3a5a     ....X:%d Y:%d Z:
+    bb20:	6425 4420 6669 3a66 6425 0020 535b 4641     %d Diff:%d .[SAF
+    bb30:	5d45 000d 4c5b 4749 5448 0d5d 0000 0000     E]..[LIGHT].....
+    bb40:	545b 4548 5446 0d5d 0000 0000 515b 4155     [THEFT].....[QUA
+    bb50:	454b 0d5d 0000 0000 6425 252c 2c64 6425     KE].....%d,%d,%d
+    bb60:	252c 2c64 6425 000a                         ,%d,%d..
 
-0000bb6c <MemNum>:
-    bb6c:	0000 0000 0001 0000 0002 0000 0004 0004     ................
+0000bb68 <MemNum>:
+    bb68:	0000 0000 0001 0000 0002 0000 0004 0004     ................
 
-0000bb7c <MemSize>:
-    bb7c:	001c 0020 00b4 0024 0014 0020 0010 0264     .. ...$... ...d.
+0000bb78 <MemSize>:
+    bb78:	001c 0020 00b4 0024 0014 0020 0010 0264     .. ...$... ...d.
 
-0000bb8c <ErrTable>:
-    bb8c:	1100 1312 1514 1716 1918 1b1a 1d1c 1f1e     ................
-    bb9c:	78e2 0000 7928 0000 7942 0000 7952 0000     .x..(y..By..Ry..
-    bbac:	7952 0000 793e 0000 793e 0000 7960 0000     Ry..>y..>y..`y..
+0000bb88 <ErrTable>:
+    bb88:	1100 1312 1514 1716 1918 1b1a 1d1c 1f1e     ................
+    bb98:	78e2 0000 7928 0000 7942 0000 7952 0000     .x..(y..By..Ry..
+    bba8:	7952 0000 793e 0000 793e 0000 7960 0000     Ry..>y..>y..`y..
 
-0000bbbc <tcp_backoff>:
-    bbbc:	0201 0403 0605 0707 0707 0707 0007 0000     ................
-    bbcc:	8ed2 0000 8fe0 0000 90cc 0000 90d4 0000     ................
-    bbdc:	917a 0000 90cc 0000 91c0 0000 91fc 0000     z...............
-    bbec:	6e28 6c75 296c 0000                         (null)..
+0000bbb8 <tcp_backoff>:
+    bbb8:	0201 0403 0605 0707 0707 0707 0007 0000     ................
+    bbc8:	8ed2 0000 8fe0 0000 90cc 0000 90d4 0000     ................
+    bbd8:	917a 0000 90cc 0000 91c0 0000 91fc 0000     z...............
+    bbe8:	6e28 6c75 296c 0000                         (null)..
