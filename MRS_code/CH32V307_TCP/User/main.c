@@ -25,8 +25,8 @@
 // ===================== 通用网络配置 =====================
 #define SERVER_IP0   192
 #define SERVER_IP1   168
-#define SERVER_IP2   1
-#define SERVER_IP3   10
+#define SERVER_IP2   137
+#define SERVER_IP3   1
 #define SERVER_PORT  8888
 
 // 网络模式定义（改这里切换模式，重新编译即可）
@@ -38,7 +38,7 @@
 
 
                     //这NONE
-#define NET_MODE       NET_MODE_ETH   // ← 改这里：NET_MODE_ETH=网口, NET_MODE_WIFI=WiFi, NET_MODE_NONE=无网络
+#define NET_MODE       NET_MODE_WIFI   // ← 改这里：NET_MODE_ETH=网口, NET_MODE_WIFI=WiFi, NET_MODE_NONE=无网络
                     //这个这个↑
 
 
@@ -73,15 +73,18 @@ u8 SocketId;
 u8 socket[WCHNET_MAX_SOCKET_NUM];
 u8 SocketRecvBuf[WCHNET_MAX_SOCKET_NUM][RECE_BUF_LEN];
 
-// ===================== WiFi专属变量（ESP-01S）=====================
-#define WIFI_SSID   "YourWiFi"
-#define WIFI_PASS   "YourPassword"
-#define ESP_BAUD    115200
-uint8_t esp_ready = 0;
-char esp_recv_buf[256];
-uint16_t esp_recv_idx = 0;
+// ===================== WiFi专属变量（ESP-01S）=======================================================================================================================================================================================================
 
-// ===================== 硬件引脚定义 =====================
+//可以手机开热点然后电脑开热点
+                                                     //这个这个这个这个这个这个这个这个
+#define WIFI_SSID   "ESP-01S"     //WiFi名字         这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个
+#define WIFI_PASS   "00000000"    //WiFi密码         这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个这个
+#define ESP_BAUD    115200                           //这个这个这个这个这个这个这个这个 
+
+
+
+
+// ===================== 硬件引脚定义 =================================================================================================================================================================================================================
 #define BEEP_PORT    GPIOA
 #define BEEP_PIN     GPIO_Pin_1
 #define I2C_SCL_PIN  GPIO_Pin_10
@@ -460,16 +463,27 @@ uint8_t ETH_Send(char *data)
     return (ret == WCHNET_ERR_SUCCESS) ? 1 : 0;
 }
 
-// ===================== WiFi实现（ESP-01S via UART4）=====================
+// ===================== WiFi实现（ESP-01S via UART4，查询方式）=====================
+void UART4_SendChar(char ch)
+{
+    while(USART_GetFlagStatus(UART4, USART_FLAG_TC) == RESET);
+    USART_SendData(UART4, ch);
+}
+
+void UART4_SendString(char *str)
+{
+    while(*str) UART4_SendChar(*str++);
+}
+
 void UART4_Init(uint32_t baud)
 {
     GPIO_InitTypeDef GPIO_InitStruct = {0};
     USART_InitTypeDef USART_InitStruct = {0};
-    NVIC_InitTypeDef NVIC_InitStruct = {0};
 
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC, ENABLE);
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_UART4, ENABLE);
 
+    // PC10 = UART4_TX（发），PC11 = UART4_RX（收）
     GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10;
     GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF_PP;
     GPIO_InitStruct.GPIO_Speed = GPIO_Speed_50MHz;
@@ -486,69 +500,119 @@ void UART4_Init(uint32_t baud)
     USART_InitStruct.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
     USART_InitStruct.USART_Mode = USART_Mode_Tx | USART_Mode_Rx;
     USART_Init(UART4, &USART_InitStruct);
-
-    USART_ITConfig(UART4, USART_IT_RXNE, ENABLE);
-    NVIC_InitStruct.NVIC_IRQChannel = UART4_IRQn;
-    NVIC_InitStruct.NVIC_IRQChannelPreemptionPriority = 2;
-    NVIC_InitStruct.NVIC_IRQChannelSubPriority = 2;
-    NVIC_InitStruct.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStruct);
-
     USART_Cmd(UART4, ENABLE);
 }
 
-void UART4_SendString(char *str)
+// 发AT指令并等待回复，成功返回1，失败返回0
+// cmd为空字符串时只等待回复，不发送
+uint8_t ESP_SendAT(char *cmd, char *expect, uint32_t timeout)
 {
-    while(*str)
+    char buf[256];
+    uint16_t idx = 0;
+    uint32_t t = timeout;
+    if(cmd[0] != 0)
     {
-        while(USART_GetFlagStatus(UART4, USART_FLAG_TC) == RESET);
-        USART_SendData(UART4, *str++);
+        printf("[ESP TX] %s\r\n", cmd);
+        UART4_SendString(cmd);
+        UART4_SendString("\r\n");
     }
-}
-
-void UART4_SendAT(char *cmd)
-{
-    printf("[ESP TX] %s\r\n", cmd);
-    UART4_SendString(cmd);
-    UART4_SendString("\r\n");
-}
-
-uint8_t ESP_WaitReply(char *keyword, uint32_t timeout_ms)
-{
-    while(timeout_ms--)
+    while(t--)
     {
-        if(strstr(esp_recv_buf, keyword) != NULL) return 1;
-        Delay_Ms(1);
+        // 每1ms内检查100次RXNE（每10us一次），防止丢字节
+        for(uint8_t i = 0; i < 100; i++) {
+            if(USART_GetFlagStatus(UART4, USART_FLAG_RXNE) == SET)
+            {
+                char c = USART_ReceiveData(UART4);
+                if(idx < 255) buf[idx++] = c;
+                buf[idx] = 0;
+                if(strstr(buf, expect) != 0) return 1;
+            }
+            Delay_Us(10);
+        }
     }
+    buf[idx] = 0;
+    printf("[ESP RX] ");
+    for(uint16_t i = 0; i < idx; i++) printf("%02X ", (uint8_t)buf[i]);
+    printf("('%s')\r\n", buf);
     return 0;
 }
 
 void WiFi_Init(void)
 {
     printf("[3/3] Init WiFi (ESP-01S)...\r\n");
-    UART4_Init(ESP_BAUD);
-    esp_recv_idx = 0;
-    memset(esp_recv_buf, 0, sizeof(esp_recv_buf));
 
-    Delay_Ms(1000);
+    printf("[ESP] Reset...\r\n");
+    UART4_Init(115200);
+    Delay_Ms(3000);  // 等3秒让ESP完全启动
 
-    UART4_SendAT("AT");
-    if(!ESP_WaitReply("OK", 2000)) { printf("[WARN] ESP AT Fail\r\n"); return; }
+    // ===== 深度调试：发AT后持续收5秒，打印所有数据 =====
+    printf("[DEBUG] send AT, listen 5s...\r\n");
+    UART4_SendString("AT\r\n");
+    char dbg[512];
+    uint16_t dbg_idx = 0;
+    for(uint32_t t = 0; t < 5000; t++) {
+        for(uint8_t i = 0; i < 100; i++) {
+            if(USART_GetFlagStatus(UART4, USART_FLAG_RXNE) == SET) {
+                uint8_t c = USART_ReceiveData(UART4);
+                if(dbg_idx < 511) dbg[dbg_idx++] = c;
+            }
+            Delay_Us(10);
+        }
+    }
+    dbg[dbg_idx] = 0;
+    printf("[DEBUG] got %d bytes: ", dbg_idx);
+    for(uint16_t i = 0; i < dbg_idx; i++) printf("%02X ", (uint8_t)dbg[i]);
+    printf("\r\n[DEBUG] as text: '%s'\r\n", dbg);
+    if(dbg_idx == 0) {
+        printf("[DEBUG] NO DATA from ESP - check TX/RX wiring!\r\n");
+        return;
+    }
+
+    // 自动检测波特率
+    uint32_t bauds[] = {115200, 9600, 19200, 38400, 57600, 74880, 230400};
+    uint8_t found = 0;
+    uint32_t correct_baud = 115200;
+    for(int i = 0; i < 7; i++) {
+        UART4_Init(bauds[i]);
+        Delay_Ms(100);
+        printf("[BAUD] try %lu...\r\n", bauds[i]);
+        if(ESP_SendAT("AT", "OK", 1000)) {
+            correct_baud = bauds[i];
+            found = 1;
+            printf("[BAUD] OK! ESP baud=%lu\r\n", bauds[i]);
+            break;
+        }
+    }
+    if(!found) { printf("[ESP] AT FAIL (all bauds)\r\n"); return; }
+    UART4_Init(correct_baud);
     printf("[OK] ESP AT Ready\r\n");
 
-    UART4_SendAT("AT+CWMODE=1");
-    ESP_WaitReply("OK", 2000);
+    // 设置Station模式
+    ESP_SendAT("AT+CWMODE=1", "OK", 2000);
 
+    // 连接WiFi
+    printf("[ESP] Connecting WiFi...\r\n");
     char cmd[128];
     sprintf(cmd, "AT+CWJAP=\"%s\",\"%s\"", WIFI_SSID, WIFI_PASS);
-    UART4_SendAT(cmd);
-    if(!ESP_WaitReply("WIFI GOT IP", 15000)) { printf("[WARN] WiFi Connect Fail\r\n"); return; }
+    if(!ESP_SendAT(cmd, "WIFI GOT IP", 15000))
+    {
+        printf("[WARN] WiFi Connect Fail\r\n");
+        return;
+    }
     printf("[OK] WiFi Connected\r\n");
 
+    // 查询ESP的IP地址，确认和电脑同网段
+    ESP_SendAT("AT+CIFSR", "STAIP", 3000);
+
+    // 连接TCP服务器
+    printf("[ESP] Connecting Server...\r\n");
     sprintf(cmd, "AT+CIPSTART=\"TCP\",\"%d.%d.%d.%d\",%d",
             SERVER_IP0,SERVER_IP1,SERVER_IP2,SERVER_IP3,SERVER_PORT);
-    UART4_SendAT(cmd);
-    if(!ESP_WaitReply("CONNECT", 5000)) { printf("[WARN] TCP Connect Fail\r\n"); return; }
+    if(!ESP_SendAT(cmd, "CONNECT", 10000))
+    {
+        printf("[WARN] TCP Connect Fail\r\n");
+        return;
+    }
     net_connected = 1;
     printf(">>> TCP Connect Success!\r\n");
 }
@@ -564,24 +628,9 @@ uint8_t WiFi_Send(char *data)
     char cmd[32];
     uint16_t len = strlen(data);
     sprintf(cmd, "AT+CIPSEND=%d", len);
-    UART4_SendAT(cmd);
-    Delay_Ms(100);
+    if(!ESP_SendAT(cmd, ">", 3000)) return 0;
     UART4_SendString(data);
-    return ESP_WaitReply("SEND OK", 2000);
-}
-
-void UART4_IRQHandler(void)
-{
-    if(USART_GetITStatus(UART4, USART_IT_RXNE) != RESET)
-    {
-        uint8_t ch = USART_ReceiveData(UART4);
-        if(esp_recv_idx < sizeof(esp_recv_buf)-1)
-        {
-            esp_recv_buf[esp_recv_idx++] = ch;
-            esp_recv_buf[esp_recv_idx] = 0;
-        }
-        USART_ClearITPendingBit(UART4, USART_IT_RXNE);
-    }
+    return ESP_SendAT("", "SEND OK", 3000);
 }
 
 // ===================== 网络抽象层（根据net_mode分发）=====================
@@ -630,6 +679,7 @@ int main(void)
     else if(net_mode == NET_MODE_WIFI) printf(" (WiFi)");
     else                               printf(" (NONE)");
     printf(" ===\r\n");
+    printf("[CLK] SystemCoreClock = %u Hz\r\n", (unsigned int)SystemCoreClock);
     printf("[Mode] Change NET_MODE macro to switch network\r\n");
 
     // 初始化硬件

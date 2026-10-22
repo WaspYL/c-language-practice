@@ -1,5 +1,5 @@
 ################################################################################
-# MRS Version: 2.5.0
+# MRS Version: 3.0.0
 # Automatically-generated file. Do not edit!
 ################################################################################
 
@@ -24,6 +24,6 @@ DIR_EXPANDS += \
 
 
 # Each subdirectory must supply rules for building sources it contributes
-Startup/%.o: ../Startup/%.S
+Startup/%.o: ../Startup/%.S $(FLAGS_ASM_FILE)
 	@	riscv-none-embed-gcc -march=rv32imacxw -mabi=ilp32 -msmall-data-limit=8 -msave-restore -fmax-errors=20 -Os -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -fno-common -Wunused -Wuninitialized -g -x assembler-with-cpp -I"c:/Users/WaspYL/Desktop/c-language-practice/MRS_code/CH32V307_TCP/Startup" -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -c -o "$@" "$<"
 
