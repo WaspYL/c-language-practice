@@ -15,7 +15,16 @@ def main():
     server.bind((HOST, PORT))
     server.listen(1)
     print(f"[服务器启动] 监听 {HOST}:{PORT}")
-    print(f"[等待连接] 请确保开发板网线已连接，电脑IP设为192.168.1.10")
+    print("WiFi(Station模式)操作：电脑开移动热点 ESP-01S（密码00000000，2.4G），ESP会连入")
+    print("本机热点网关应为 192.168.137.1；ESP连入后会自动发数据到这里")
+    # 打印本机所有IPv4，方便确认
+    try:
+        hostname = socket.gethostname()
+        ips = sorted(set(i[4][0] for i in socket.getaddrinfo(hostname, None, socket.AF_INET)))
+        for ip in ips:
+            print(f"  本机IP: {ip}")
+    except Exception:
+        pass
     print("-" * 50)
 
     while True:
