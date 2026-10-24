@@ -30,19 +30,17 @@
 #define SERVER_IP3   1
 #define SERVER_PORT  8888
 
-// 网络模式定义（改这里切换模式，重新编译即可）
+// 网口（ETH）模式：网线直连电脑，电脑以太网口固定IP=192.168.1.10
+#define ETH_SERVER_IP0  192
+#define ETH_SERVER_IP1  168
+#define ETH_SERVER_IP2  1
+#define ETH_SERVER_IP3  10
+
+// 网络模式定义（这是开机默认模式；运行中可用短按按键循环切换）
 #define NET_MODE_NONE  0
 #define NET_MODE_ETH   1
 #define NET_MODE_WIFI  2
-//===================== 改连接方式 ===================================================================================================================================================
-
-
-
-                    //这NONE
-#define NET_MODE       NET_MODE_WIFI   // ← 改这里：NET_MODE_ETH=网口, NET_MODE_WIFI=WiFi, NET_MODE_NONE=无网络
-                    //这个这个↑
-
-
+#define NET_MODE       NET_MODE_WIFI   // 开机默认：ETH=网口 WIFI=WiFi NONE=无网络；运行中可短按按键循环切换
 
 // ===================== 全局变量 ===================================================================================================================================================
 uint8_t net_mode = NET_MODE;  // 当前网络模式（由宏定义决定）
@@ -550,7 +548,7 @@ void ETH_Network_Init(void)
            MACAddr[0],MACAddr[1],MACAddr[2],MACAddr[3],MACAddr[4],MACAddr[5]);
     printf("Board IP: %d.%d.%d.%d, Connecting to %d.%d.%d.%d:%d...\r\n",
            IPAddr[0],IPAddr[1],IPAddr[2],IPAddr[3],
-           SERVER_IP0,SERVER_IP1,SERVER_IP2,SERVER_IP3,SERVER_PORT);
+           ETH_SERVER_IP0,ETH_SERVER_IP1,ETH_SERVER_IP2,ETH_SERVER_IP3,SERVER_PORT);
 
     TIM2_Init();
     u8 i = ETH_LibInit(IPAddr, GWIPAddr, IPMask, MACAddr);
@@ -567,6 +565,11 @@ void ETH_Network_Init(void)
     }
 #endif
     memset(socket, 0xff, WCHNET_MAX_SOCKET_NUM);
+    // 网口模式目标=电脑网线口IP（192.168.1.10），与WiFi的热点IP（192.168.137.1）分开
+    DESIP[0] = ETH_SERVER_IP0;
+    DESIP[1] = ETH_SERVER_IP1;
+    DESIP[2] = ETH_SERVER_IP2;
+    DESIP[3] = ETH_SERVER_IP3;
     WCHNET_CreateTcpSocket();
 }
 
