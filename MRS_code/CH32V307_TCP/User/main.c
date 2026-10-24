@@ -59,6 +59,7 @@ void OLED_DrawFace_u8g2(uint8_t level);
 void Network_Init(void);
 void Network_Task(void);
 uint8_t Network_Send(char *data);
+void WCHNET_HandleGlobalInt(void);   // 网口全局中断处理（定义在后面，提前声明）
 
 // ===================== 按键函数原型声明 =====================
 void KEY_Init(void);
@@ -263,6 +264,21 @@ void Switch_Net_Mode(void)
     {
         printf("[KEY] Closing WiFi TCP...\r\n");
         ESP_SendAT("AT+CIPCLOSE", "CLOSED", 2000);
+    }
+    // 离开网口模式前，主动关闭WCHNet的TCP连接（发FIN，四次挥手）。
+    // 否则旧连接半开、电脑端收不到关闭通知，服务器会一直守着旧连接，切到WiFi后卡收不到新数据。
+    else if(net_mode == NET_MODE_ETH && net_connected)
+    {
+        printf("[KEY] Closing ETH TCP...\r\n");
+        WCHNET_SocketClose(SocketId, TCP_CLOSE_NORMAL);
+        {
+            uint16_t t;
+            for(t = 0; t < 20; t++) {   // 喂协议栈约100ms，让FIN包真正发出去
+                WCHNET_MainTask();
+                if(WCHNET_QueryGlobalInt()) WCHNET_HandleGlobalInt();
+                Delay_Ms(5);
+            }
+        }
     }
 
     net_connected = 0;       // 断开当前TCP

@@ -13,7 +13,7 @@ def main():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server.bind((HOST, PORT))
-    server.listen(1)
+    server.listen(5)  # 队列留5个，模式切换时新连接能排队等待accept
     print(f"[服务器启动] 监听 {HOST}:{PORT}")
     print("WiFi(Station模式)操作：电脑开移动热点 ESP-01S（密码00000000，2.4G），ESP会连入")
     print("本机热点网关应为 192.168.137.1；ESP连入后会自动发数据到这里")
@@ -32,6 +32,7 @@ def main():
             conn, addr = server.accept()
             print(f"\n[客户端连接] {addr[0]}:{addr[1]}")
             conn.settimeout(5.0)
+            idle = 0  # 连续无数据的超时次数（每5秒+1）
 
             while True:
                 try:
@@ -39,6 +40,7 @@ def main():
                     if not data:
                         print("[客户端断开]")
                         break
+                    idle = 0  # 收到数据说明连接活着，重置计数
                     # 解码并打印
                     text = data.decode('utf-8', errors='ignore').strip()
                     if text:
@@ -53,8 +55,13 @@ def main():
                                 else:
                                     print(f"[原始] {line}")
                 except socket.timeout:
-                    # 超时不处理，继续等
-                    pass
+                    # 模式切换时旧连接可能半开（板子没发FIN），recv一直等。
+                    # 连续15秒(3×5秒)无数据，判定旧连接已死，回accept取新连接。
+                    # 板子每500ms发一次，正常绝不可能15秒无数据。
+                    idle += 1
+                    if idle >= 3:
+                        print("[空闲15秒无数据，判定旧连接已断开，等待新连接]")
+                        break
                 except ConnectionResetError:
                     print("[连接重置]")
                     break
